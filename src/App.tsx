@@ -16,7 +16,7 @@ export default function App() {
             <div className="flex items-center gap-3">
               <div className="flex h-20 w-20 items-center justify-center scale-[1.18]">
                 <img
-                  src="./public/ms.png"
+                  src="https://mindfulcircle.vercel.app/src/public/ms.png" <!---Change from vercel when hosting changes--->
                   alt="Mindful Circle logo"
                   className="h-full w-full object-contain"
                 />
