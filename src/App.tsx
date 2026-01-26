@@ -16,7 +16,7 @@ export default function App() {
             <div className="flex items-center gap-3">
               <div className="flex h-20 w-20 items-center justify-center scale-[1.18]">
                 <img
-                  src="https://github.com/oswaldamoah/mindfulcircle/blob/78f5f1171c8f0ee3732745b0564f13faceaba3a0/src/public/ms.png" 
+                  src="src/public/ms.png" 
                   alt="Mindful Circle logo"
                   className="h-full w-full object-contain"
                 />
