@@ -101,13 +101,13 @@ export default function App() {
                 <div className="space-y-4">
                   <div className="rounded-2xl bg-[#c8a9d9] px-6 py-4 shadow-md">
                     <p className="text-lg text-gray-900">
-                      Account number:{'9040014155508'}
+                      Account number:{''}
                       <button
                         type="button"
                         onClick={() => copyToClipboard('9040014155508')}
                         className="text-black hover:text-[#5b2a7f] underline-offset-2 hover:underline cursor-pointer font-medium"
                       >
-                        
+                        9040014155508
                       </button>
                     </p>
                   </div>
