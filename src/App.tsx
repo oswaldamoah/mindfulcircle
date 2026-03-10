@@ -107,7 +107,7 @@ export default function App() {
                         onClick={() => copyToClipboard('9040014155508')}
                         className="text-black hover:text-[#5b2a7f] underline-offset-2 hover:underline cursor-pointer font-medium"
                       >
-                        9040014155508
+                        
                       </button>
                     </p>
                   </div>
@@ -135,7 +135,7 @@ export default function App() {
                       >
                         0599078844
                       </button>{' '}
-                      Eugene Kwesi Arkhurst (MTN)
+                      - Eugene Kwesi Arkhurst (MTN)
                     </p>
                   </div>
                   <div className="rounded-2xl bg-[#c8a9d9] px-6 py-4 shadow-md">
@@ -147,7 +147,7 @@ export default function App() {
                       >
                         0206238800
                       </button>{' '}
-                      Eugene Kwesi Arkhurst (Telecel)
+                      - Eugene Kwesi Arkhurst (Telecel)
                     </p>
                   </div>
                 </div>
