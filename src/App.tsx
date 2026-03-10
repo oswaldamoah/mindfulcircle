@@ -101,21 +101,21 @@ export default function App() {
                 <div className="space-y-4">
                   <div className="rounded-2xl bg-[#c8a9d9] px-6 py-4 shadow-md">
                     <p className="text-lg text-gray-900">
-                      Account number:{' '}
+                      Account number:{'9040014155508'}
                       <button
                         type="button"
-                        onClick={() => copyToClipboard('0000000000')}
+                        onClick={() => copyToClipboard('9040014155508')}
                         className="text-black hover:text-[#5b2a7f] underline-offset-2 hover:underline cursor-pointer font-medium"
                       >
-                        0000000000
+                        9040014155508
                       </button>
                     </p>
                   </div>
                   <div className="rounded-2xl bg-[#c8a9d9] px-6 py-4 shadow-md">
-                    <p className="text-lg text-gray-900">Account name:</p>
+                    <p className="text-lg text-gray-900">Account name: <strong>Gerald Kwesi Amoako </strong></p>
                   </div>
                   <div className="rounded-2xl bg-[#c8a9d9] px-6 py-4 shadow-md">
-                    <p className="text-lg text-gray-900">Bank: Absa bank</p>
+                    <p className="text-lg text-gray-900">Bank: <strong>Stanbic Bank (West Hills Mall)</strong></p>
                   </div>
                 </div>
               </div>
@@ -135,7 +135,7 @@ export default function App() {
                       >
                         0599078844
                       </button>{' '}
-                      MTN- Eugene Kwesi Arkhurst
+                      Eugene Kwesi Arkhurst (MTN)
                     </p>
                   </div>
                   <div className="rounded-2xl bg-[#c8a9d9] px-6 py-4 shadow-md">
@@ -147,7 +147,7 @@ export default function App() {
                       >
                         0206238800
                       </button>{' '}
-                      Telecel/Vodafone- Eugene Kwesi Arkhurst
+                      Eugene Kwesi Arkhurst (Telecel)
                     </p>
                   </div>
                 </div>
