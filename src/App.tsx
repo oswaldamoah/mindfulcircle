@@ -101,7 +101,7 @@ export default function App() {
                 <div className="space-y-4">
                   <div className="rounded-2xl bg-[#c8a9d9] px-6 py-4 shadow-md">
                     <p className="text-lg text-gray-900">
-                      Account number:{''}
+                      Account number: {''}
                       <button
                         type="button"
                         onClick={() => copyToClipboard('9040014155508')}
@@ -123,7 +123,7 @@ export default function App() {
               {/* Mobile Money Numbers */}
               <div>
                 <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">
-                  Mobile money numbers
+                  Mobile Money Numbers
                 </h2>
                 <div className="space-y-4">
                   <div className="rounded-2xl bg-[#c8a9d9] px-6 py-4 shadow-md">
