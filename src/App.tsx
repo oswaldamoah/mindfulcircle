@@ -72,11 +72,9 @@ function DonateModal({ onClose }: { onClose: () => void }) {
   const wa = (msg: string) => `https://wa.me/233599078844?text=${encodeURIComponent(msg)}`;
 
   const channels = [
-    { id: "momo",    label: "MTN Mobile Money",           holder: "Eugene Kwesi Arkhurst", num: "0599078844",    nk: "mn", mk: "mm", cls: "logo-mtn",     logo: "/mtnmomo.png",     alt: "MTN",     fb: "MTN",  wa: true  },
     { id: "telecel", label: "Telecel Cash",                holder: "Eugene Kwesi Arkhurst", num: "0206238800",    nk: "tn", mk: "tm", cls: "logo-telecel",  logo: "/tcash.png", alt: "Telecel", fb: "TCL",  wa: true  },
     { id: "bank",    label: "Stanbic Bank, West Hills Mall", holder: "Gerald Kwesi Amoako", num: "9040014155508", nk: "bn", mk: "bm", cls: "logo-bank",     logo: "/stanbic.png", alt: "Stanbic", fb: "SB",   wa: false },
   ] as const;
-
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-box" onClick={e => e.stopPropagation()}>
@@ -183,7 +181,6 @@ export default function App() {
             <a href="#impact">Impact</a>
             <a href="#donate">Donate</a>
           </nav>
-          <button className="header-cta" onClick={openModal}>Donate</button>
         </div>
       </header>
 
@@ -300,7 +297,6 @@ export default function App() {
             {/* Quick-copy channel cards */}
             <div className="qc-col">
               {[
-                { label: "MTN Mobile Money",               owner: "Eugene Kwesi Arkhurst", num: "0599078844",    key: "mtn",  cls: "logo-mtn",     logo: "/mtnmomo.png",     alt: "MTN MoMo",     fb: "MTN" },
                 { label: "Telecel Cash",                    owner: "Eugene Kwesi Arkhurst", num: "0206238800",    key: "tcl",  cls: "logo-telecel",  logo: "/tcash.png", alt: "Telecel Cash",  fb: "TCL" },
                 { label: "Stanbic Bank, West Hills Mall",  owner: "Gerald Kwesi Amoako",   num: "9040014155508", key: "bank", cls: "logo-bank",     logo: "/stanbic.png", alt: "Stanbic Bank",  fb: "SB"  },
               ].map(c => (

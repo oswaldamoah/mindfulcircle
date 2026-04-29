@@ -290,6 +290,33 @@ strong { font-weight: 600; color: var(--p800); }
   color: var(--p800);
   border: 1.5px solid var(--p200);
 }
+@media (max-width: 600px) {
+  .section-wrap { padding: 0 1.25rem; }
+  .hero { padding: 4.5rem 1.25rem 4.25rem; }
+  .about-section { padding: 4.5rem 1.25rem; }
+  .impact-section { padding: 4.5rem 1.25rem; }
+  .donate-section { padding: 4.5rem 1.25rem 5rem; }
+  .footer { padding: 3rem 1.25rem 2.25rem; }
+
+  .hero-cta-row,
+  .hero-social-row {
+    width: 100%;
+  }
+  .social-chip {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+  }
+  .email-chip { overflow-wrap: anywhere; word-break: break-word; }
+
+  .ch-copy,
+  .ch-wa {
+    white-space: normal;
+    justify-content: center;
+    flex: 1 1 100%;
+  }
+}
 
 /* ── About ─────────────────────────────────────────────────────────────────── */
 .about-section {
