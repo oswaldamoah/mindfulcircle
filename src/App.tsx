@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import EventsPage from "./Events";
 
 const copyToClipboard = (text: string) => {
   if (navigator?.clipboard?.writeText) {
@@ -150,6 +151,13 @@ function DonateModal({ onClose }: { onClose: () => void }) {
 export default function App() {
   const [modal, setModal] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [path, setPath] = useState(() => window.location.pathname);
+
+  useEffect(() => {
+    const handlePop = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
 
   const copy = (text: string, key: string) => {
     copyToClipboard(text);
@@ -158,6 +166,17 @@ export default function App() {
   };
 
   const openModal = () => setModal(true);
+  const isEvents = path === "/events";
+  const navItems = isEvents
+    ? [
+        { label: "Home", href: "/" },
+        { label: "Donate", href: "/#donate" },
+      ]
+    : [
+        { label: "About", href: "#about" },
+        { label: "Events", href: "/events" },
+        { label: "Donate", href: "#donate" },
+      ];
 
   return (
     <div className="root">
@@ -177,169 +196,182 @@ export default function App() {
             </div>
           </div>
           <nav className="header-nav">
-            <a href="#about">About</a>
-            <a href="#impact">Impact</a>
-            <a href="#donate">Donate</a>
+            {navItems.map((item) => (
+              <a key={item.href} href={item.href}>{item.label}</a>
+            ))}
           </nav>
         </div>
       </header>
 
-      {/* ── Hero Section── */}
-      <section className="hero">
-        <div className="hero-glow" />
-        <div className="hero-inner">
-          <p className="hero-kicker">A movement, not a moment.</p>
-          <h1 className="hero-h1">
-            Safe spaces for<br /><em>young minds.</em>
-          </h1>
-          <p className="hero-body">
-            Mindful Circle is a youth-led movement creating stigma-free spaces where young people can share, breathe, and heal together. Every donation goes directly into the circles, campaigns, and peer support sessions that make that possible.
-          </p>
-          <div className="hero-cta-row">
-            <button className="btn-donate" onClick={openModal}>Donate Now</button>
-            <div className="hero-social-row">
-              <a href="https://instagram.com/the_mindfulcircle" target="_blank" rel="noopener noreferrer" className="social-chip ig-chip">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-                @the_mindfulcircle
-              </a>
-              <a href="https://www.tiktok.com/@the_mindful_circle" target="_blank" rel="noopener noreferrer" className="social-chip tt-chip">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
-                  <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/>
-                </svg>
-                @the_mindful_circle
-              </a>
-              <a href="mailto:miindfulcircle@gmail.com" className="social-chip email-chip">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-                miindfulcircle@gmail.com
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── About ── */}
-      <section id="about" className="about-section">
-        <div className="section-wrap">
-          <div className="about-grid">
-            <div className="about-left">
-              <h2 className="section-h2">What is Mindful Circle?</h2>
-              <p>Mindful Circle is a <strong>youth-led mental health movement</strong> building safe, stigma-free spaces where young people can breathe, share, and heal, in schools, communities, and online.</p>
-              <p>We run community circles, peer-support sessions, awareness campaigns, and creative projects that make mental health support visible, normal, and accessible, especially for those who've never had access to it.</p>
-              <p>Join us to put more people in spaces, where they feel safe enough to express themselves.</p>
-            </div>
-            <div className="about-right">
-              <p className="about-right-heading">OUR ACTIVITIES</p>
-              <div className="about-list">
-                <div className="about-item">
-                  <div className="about-item-line" />
-                  <p>Safe-circle conversations in schools and communities</p>
-                </div>
-                <div className="about-item">
-                  <div className="about-item-line" />
-                  <p>Training peer supporters and youth mental health advocates</p>
-                </div>
-                <div className="about-item">
-                  <div className="about-item-line" />
-                  <p>Creative campaigns that challenge stigma through storytelling</p>
-                </div>
-                <div className="about-item">
-                  <div className="about-item-line" />
-                  <p>Mental health outreach events</p>
+      {isEvents ? (
+        <EventsPage />
+      ) : (
+        <>
+          {/* ── Hero Section── */}
+          <section className="hero">
+            <div className="hero-glow" />
+            <div className="hero-inner">
+              <p className="hero-kicker">A movement, not a moment.</p>
+              <h1 className="hero-h1">
+                Safe spaces for<br /><em>young minds.</em>
+              </h1>
+              <p className="hero-body">
+                Mindful Circle is a youth-led movement creating stigma-free spaces where young people can share, breathe, and heal together. Every donation goes directly into the circles, campaigns, and peer support sessions that make that possible.
+              </p>
+              <div className="hero-cta-row">
+                <button className="btn-donate" onClick={openModal}>Donate Now</button>
+                <div className="hero-social-row">
+                  <a href="https://instagram.com/the_mindfulcircle" target="_blank" rel="noopener noreferrer" className="social-chip ig-chip">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                    @the_mindfulcircle
+                  </a>
+                  <a href="https://www.tiktok.com/@the_mindful_circle" target="_blank" rel="noopener noreferrer" className="social-chip tt-chip">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
+                      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/>
+                    </svg>
+                    @the_mindful_circle
+                  </a>
+                  <a href="mailto:miindfulcircle@gmail.com" className="social-chip email-chip">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+                    miindfulcircle@gmail.com
+                  </a>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      {/* ── Impact ── */}
-      <section id="impact" className="impact-section">
-        <div className="impact-glow" />
-        <div className="section-wrap">
-          <h2 className="section-h2 light">The work so far.</h2>
-          <p className="impact-desc">
-            Since Mindful Circle began, <strong>every donation received has gone directly into mental health awareness activities, peer support programs, and community initiatives.</strong> No overhead deducted. No platform fees. That hasn't changed, and it won't.
-          </p>
-          <div className="stats-grid">
-            <div className="stat-block">
-              <div className="stat-num"><AnimatedNumber target={500} suffix="+" /></div>
-              <p className="stat-label">Young people reached</p>
-            </div>
-            <div className="stat-block">
-              <div className="stat-num"><AnimatedNumber target={30} suffix="+" /></div>
-              <p className="stat-label">Community circles held</p>
-            </div>
-            <div className="stat-block">
-              <div className="stat-num"><AnimatedNumber target={100} suffix="%" /></div>
-              <p className="stat-label">Of donations go to programs</p>
-            </div>
-          </div>
-          <div className="impact-cta-strip">
-            <p>Stand for mental health with Mindful Circle by supporting care, awareness, and hope.</p>
-            <button className="btn-donate-light" onClick={openModal}>Donate Now</button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Donate ── */}
-      <section id="donate" className="donate-section">
-        <div className="section-wrap">
-          <div className="donate-header">
-            <h2 className="section-h2">Donate directly.</h2>
-            <p className="donate-desc">
-              Tap any number to copy it and send via mobile money or bank transfer. For a step-by-step flow with a pre-written payment message, use the button below.
-            </p>
-          </div>
-
-          <div className="donate-layout">
-            {/* Quick-copy channel cards */}
-            <div className="qc-col">
-              {[
-                { label: "Telecel Cash",                    owner: "Eugene Kwesi Arkhurst", num: "0206238800",    key: "tcl",  cls: "logo-telecel",  logo: "/tcash.png", alt: "Telecel Cash",  fb: "TCL" },
-                { label: "Stanbic Bank, West Hills Mall",  owner: "Gerald Kwesi Amoako",   num: "9040014155508", key: "bank", cls: "logo-bank",     logo: "/stanbic.png", alt: "Stanbic Bank",  fb: "SB"  },
-              ].map(c => (
-                <div className="qc-card" key={c.key}>
-                  <div className="qc-card-top">
-                    <div className={`qc-logo ${c.cls}`}>
-                      <img src={c.logo} alt={c.alt} className="qc-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
-                      <span className="qc-logo-fb">{c.fb}</span>
+          {/* ── About ── */}
+          <section id="about" className="about-section">
+            <div className="section-wrap">
+              <div className="about-grid">
+                <div className="about-left">
+                  <h2 className="section-h2">What is Mindful Circle?</h2>
+                  <p>Mindful Circle is a <strong>youth-led mental health movement</strong> building safe, stigma-free spaces where young people can breathe, share, and heal, in schools, communities, and online.</p>
+                  <p>We run community circles, peer-support sessions, awareness campaigns, and creative projects that make mental health support visible, normal, and accessible, especially for those who've never had access to it.</p>
+                  <p>Join us to put more people in spaces, where they feel safe enough to express themselves.</p>
+                </div>
+                <div className="about-right">
+                  <p className="about-right-heading">OUR ACTIVITIES</p>
+                  <div className="about-list">
+                    <div className="about-item">
+                      <div className="about-item-line" />
+                      <p>Safe-circle conversations in schools and communities</p>
                     </div>
-                    <div>
-                      <p className="qc-label">{c.label}</p>
-                      <p className="qc-owner">{c.owner}</p>
+                    <div className="about-item">
+                      <div className="about-item-line" />
+                      <p>Training peer supporters and youth mental health advocates</p>
+                    </div>
+                    <div className="about-item">
+                      <div className="about-item-line" />
+                      <p>Creative campaigns that challenge stigma through storytelling</p>
+                    </div>
+                    <div className="about-item">
+                      <div className="about-item-line" />
+                      <p>Mental health outreach events</p>
                     </div>
                   </div>
-                  <button className="qc-num-btn" onClick={() => copy(c.num, c.key)}>
-                    <span className="qc-num-text">{c.num}</span>
-                    {copied === c.key
-                      ? <span className="qc-tag-ok">Copied</span>
-                      : <span className="qc-tag">tap to copy</span>}
-                  </button>
                 </div>
-              ))}
-            </div>
-
-            {/* CTA panel */}
-            <div className="cta-panel">
-              <div className="cta-panel-glow" />
-              <div className="cta-logo-wrap">
-                <img src="/ms.png" alt="Mindful Circle" className="cta-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
-                <span className="cta-logo-fb">MC</span>
               </div>
-              <h3 className="cta-panel-h3">Donate with guidance</h3>
-              <p className="cta-panel-body">
-                Choose an amount, enter your name, and get a ready-made payment message to send via WhatsApp, or copy the details and send manually.
-              </p>
-              <button className="btn-donate cta-donate-btn" onClick={openModal}>
-                Donate Now
-              </button>
-             
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+
+          {/* ── Impact ── */}
+          <section id="impact" className="impact-section">
+            <div className="impact-glow" />
+            <div className="section-wrap">
+              <h2 className="section-h2 light">The work so far.</h2>
+              <p className="impact-desc">
+                Since Mindful Circle began, <strong>every donation received has gone directly into mental health awareness activities, peer support programs, and community initiatives.</strong> Our events are where many of these moments come to life, and we keep them open, welcoming, and youth-led.
+              </p>
+              <div className="stats-grid">
+                <div className="stat-block">
+                  <div className="stat-num"><AnimatedNumber target={500} suffix="+" /></div>
+                  <p className="stat-label">Young people reached</p>
+                </div>
+                <div className="stat-block">
+                  <div className="stat-num"><AnimatedNumber target={30} suffix="+" /></div>
+                  <p className="stat-label">Community circles held</p>
+                </div>
+                <div className="stat-block">
+                  <div className="stat-num"><AnimatedNumber target={100} suffix="%" /></div>
+                  <p className="stat-label">Of donations go to programs</p>
+                </div>
+              </div>
+              <div className="impact-events-strip">
+                <div>
+                  <p className="impact-events-title">See our events</p>
+                  <p className="impact-events-body">Open mic nights, community circles, and creative sessions where young people feel safe to speak.</p>
+                </div>
+                <a className="btn-donate-light" href="/events">Explore Events</a>
+              </div>
+              <div className="impact-cta-strip">
+                <p>Stand for mental health with Mindful Circle by supporting care, awareness, and hope.</p>
+                <button className="btn-donate-light" onClick={openModal}>Donate Now</button>
+              </div>
+            </div>
+          </section>
+
+          {/* ── Donate ── */}
+          <section id="donate" className="donate-section">
+            <div className="section-wrap">
+              <div className="donate-header">
+                <h2 className="section-h2">Donate directly.</h2>
+                <p className="donate-desc">
+                  Tap any number to copy it and send via mobile money or bank transfer. For a step-by-step flow with a pre-written payment message, use the button below.
+                </p>
+              </div>
+
+              <div className="donate-layout">
+                {/* Quick-copy channel cards */}
+                <div className="qc-col">
+                  {[
+                    { label: "Telecel Cash",                    owner: "Eugene Kwesi Arkhurst", num: "0206238800",    key: "tcl",  cls: "logo-telecel",  logo: "/tcash.png", alt: "Telecel Cash",  fb: "TCL" },
+                    { label: "Stanbic Bank, West Hills Mall",  owner: "Gerald Kwesi Amoako",   num: "9040014155508", key: "bank", cls: "logo-bank",     logo: "/stanbic.png", alt: "Stanbic Bank",  fb: "SB"  },
+                  ].map(c => (
+                    <div className="qc-card" key={c.key}>
+                      <div className="qc-card-top">
+                        <div className={`qc-logo ${c.cls}`}>
+                          <img src={c.logo} alt={c.alt} className="qc-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
+                          <span className="qc-logo-fb">{c.fb}</span>
+                        </div>
+                        <div>
+                          <p className="qc-label">{c.label}</p>
+                          <p className="qc-owner">{c.owner}</p>
+                        </div>
+                      </div>
+                      <button className="qc-num-btn" onClick={() => copy(c.num, c.key)}>
+                        <span className="qc-num-text">{c.num}</span>
+                        {copied === c.key
+                          ? <span className="qc-tag-ok">Copied</span>
+                          : <span className="qc-tag">tap to copy</span>}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA panel */}
+                <div className="cta-panel">
+                  <div className="cta-panel-glow" />
+                  <div className="cta-logo-wrap">
+                    <img src="/ms.png" alt="Mindful Circle" className="cta-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
+                    <span className="cta-logo-fb">MC</span>
+                  </div>
+                  <h3 className="cta-panel-h3">Donate with guidance</h3>
+                  <p className="cta-panel-body">
+                    Choose an amount, enter your name, and get a ready-made payment message to send via WhatsApp, or copy the details and send manually.
+                  </p>
+                  <button className="btn-donate cta-donate-btn" onClick={openModal}>
+                    Donate Now
+                  </button>
+                 
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       {/* ── Footer ── */}
       <footer className="footer">
