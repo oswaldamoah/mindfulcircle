@@ -184,7 +184,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── Hero ── */}
+      {/* ── Hero Section── */}
       <section className="hero">
         <div className="hero-glow" />
         <div className="hero-inner">
