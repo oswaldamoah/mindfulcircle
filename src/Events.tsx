@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import openMicHtml from "../open-mic-night.html?raw";
 
 export default function EventsPage() {
-  const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const images = useMemo(() => {
     if (!openMicHtml) return [] as string[];
     const doc = new DOMParser().parseFromString(openMicHtml, "text/html");
@@ -11,6 +12,78 @@ export default function EventsPage() {
       .filter((src): src is string => Boolean(src));
     return Array.from(new Set(srcs));
   }, []);
+  const activeImage = activeIndex === null ? null : images[activeIndex] ?? null;
+
+  const goNext = () => {
+    if (!images.length) return;
+    setActiveIndex((prev) => {
+      if (prev === null) return 0;
+      return (prev + 1) % images.length;
+    });
+  };
+
+  const goPrev = () => {
+    if (!images.length) return;
+    setActiveIndex((prev) => {
+      if (prev === null) return 0;
+      return (prev - 1 + images.length) % images.length;
+    });
+  };
+
+  const closeModal = () => {
+    setActiveIndex(null);
+    setIsPlaying(false);
+  };
+
+  const openFullSize = () => {
+    if (!activeImage) return;
+    window.open(activeImage, "_blank", "noopener,noreferrer");
+  };
+
+  const downloadAsPng = async () => {
+    if (!activeImage) return;
+    try {
+      const response = await fetch(activeImage, { mode: "cors" });
+      if (!response.ok) throw new Error("download-failed");
+      const blob = await response.blob();
+      const bitmap = await createImageBitmap(blob);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("no-canvas");
+      ctx.drawImage(bitmap, 0, 0);
+      const pngUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = pngUrl;
+      link.download = "mindful-circle-event.png";
+      link.click();
+    } catch {
+      const link = document.createElement("a");
+      link.href = activeImage;
+      link.download = "mindful-circle-event";
+      link.click();
+    }
+  };
+
+  useEffect(() => {
+    if (!isPlaying || activeIndex === null) return;
+    const timer = window.setInterval(() => {
+      goNext();
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [isPlaying, activeIndex, images.length]);
+
+  useEffect(() => {
+    if (activeIndex === null) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "ArrowRight") goNext();
+      if (event.key === "ArrowLeft") goPrev();
+      if (event.key === "Escape") closeModal();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [activeIndex, images.length]);
 
   return (
     <main className="events-page">
@@ -44,7 +117,7 @@ export default function EventsPage() {
                 key={`${src}-${index}`}
                 className="events-gallery-item"
                 type="button"
-                onClick={() => setActiveImage(src)}
+                onClick={() => setActiveIndex(index)}
               >
                 <img src={src} alt={`Open Mic Night ${index + 1}`} loading="lazy" />
               </button>
@@ -54,15 +127,24 @@ export default function EventsPage() {
       </section>
 
       {activeImage && (
-        <div className="events-modal" onClick={() => setActiveImage(null)}>
+        <div className="events-modal" onClick={closeModal}>
           <div className="events-modal-card" onClick={(event) => event.stopPropagation()}>
-            <button className="events-modal-close" onClick={() => setActiveImage(null)} aria-label="Close preview">
+            <button className="events-modal-close" onClick={closeModal} aria-label="Close preview">
               <span aria-hidden="true">&times;</span>
+            </button>
+            <button className="events-modal-nav prev" onClick={goPrev} aria-label="Previous image">
+              <span aria-hidden="true">&lsaquo;</span>
+            </button>
+            <button className="events-modal-nav next" onClick={goNext} aria-label="Next image">
+              <span aria-hidden="true">&rsaquo;</span>
             </button>
             <img src={activeImage} alt="Open Mic Night preview" />
             <div className="events-modal-actions">
-              <a className="events-modal-link" href={activeImage} target="_blank" rel="noopener noreferrer">Open full size</a>
-              <a className="btn-donate" href={activeImage} download>Download</a>
+              <button className="events-modal-link" onClick={openFullSize} type="button">Open full size</button>
+              <button className="events-modal-link" onClick={() => setIsPlaying((prev) => !prev)} type="button">
+                {isPlaying ? "Pause slideshow" : "Play slideshow"}
+              </button>
+              <button className="btn-donate" type="button" onClick={downloadAsPng}>Download PNG</button>
             </div>
           </div>
         </div>
