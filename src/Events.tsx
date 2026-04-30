@@ -15,6 +15,7 @@ export default function EventsPage() {
               <p className="events-card-title">Open Mic Night</p>
               <p className="events-card-body">A night of stories, music, and courage from our community.</p>
             </div>
+            <!--- donate --->
             <a className="btn-donate" href="#open-mic-night">View gallery</a>
           </div>
         </div>
