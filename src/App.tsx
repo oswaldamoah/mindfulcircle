@@ -167,6 +167,20 @@ export default function App() {
 
   const openModal = () => setModal(true);
   const isEvents = path === "/events";
+  const handleNav = (href: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!href.startsWith("/")) return;
+    event.preventDefault();
+    const [nextPath, hash] = href.split("#");
+    const targetPath = nextPath || "/";
+    window.history.pushState({}, "", targetPath + (hash ? `#${hash}` : ""));
+    setPath(targetPath);
+    if (hash) {
+      setTimeout(() => {
+        const target = document.getElementById(hash);
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 0);
+    }
+  };
   const navItems = isEvents
     ? [
         { label: "Home", href: "/" },
@@ -197,7 +211,7 @@ export default function App() {
           </div>
           <nav className="header-nav">
             {navItems.map((item) => (
-              <a key={item.href} href={item.href}>{item.label}</a>
+              <a key={item.href} href={item.href} onClick={handleNav(item.href)}>{item.label}</a>
             ))}
           </nav>
         </div>
@@ -304,7 +318,7 @@ export default function App() {
                   <p className="impact-events-title">See our events</p>
                   <p className="impact-events-body">Open mic nights, community circles, and creative sessions where young people feel safe to speak.</p>
                 </div>
-                <a className="btn-donate-light" href="/events">Explore Events</a>
+                <a className="btn-donate-light" href="/events" onClick={handleNav("/events")}>Explore Events</a>
               </div>
               <div className="impact-cta-strip">
                 <p>Stand for mental health with Mindful Circle by supporting care, awareness, and hope.</p>
