@@ -1,4 +1,4 @@
-import openMicHtml from "../open-mic-night.HTML?raw";
+import openMicHtml from "../open-mic-night.html?raw";
 
 export default function EventsPage() {
   return (
