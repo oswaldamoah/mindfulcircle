@@ -1,6 +1,17 @@
+import { useMemo, useState } from "react";
 import openMicHtml from "../open-mic-night.html?raw";
 
 export default function EventsPage() {
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+  const images = useMemo(() => {
+    if (!openMicHtml) return [] as string[];
+    const doc = new DOMParser().parseFromString(openMicHtml, "text/html");
+    const srcs = Array.from(doc.images)
+      .map((img) => img.src)
+      .filter((src): src is string => Boolean(src));
+    return Array.from(new Set(srcs));
+  }, []);
+
   return (
     <main className="events-page">
       <section className="events-intro">
@@ -19,14 +30,43 @@ export default function EventsPage() {
           </div>
         </div>
       </section>
-      <div className="events-frame-wrap">
-        <iframe
-          id="open-mic-night"
-          className="events-frame"
-          title="Open Mic Night"
-          srcDoc={openMicHtml}
-        />
-      </div>
+      <section id="open-mic-night" className="events-gallery-section">
+        <div className="events-gallery-header">
+          <h2 className="events-gallery-title">Open Mic Night Gallery</h2>
+          <p className="events-gallery-body">Tap any photo to preview and download.</p>
+        </div>
+        <div className="events-gallery-grid">
+          {images.length === 0 ? (
+            <div className="events-gallery-empty">Gallery images will appear here once loaded.</div>
+          ) : (
+            images.map((src, index) => (
+              <button
+                key={`${src}-${index}`}
+                className="events-gallery-item"
+                type="button"
+                onClick={() => setActiveImage(src)}
+              >
+                <img src={src} alt={`Open Mic Night ${index + 1}`} loading="lazy" />
+              </button>
+            ))
+          )}
+        </div>
+      </section>
+
+      {activeImage && (
+        <div className="events-modal" onClick={() => setActiveImage(null)}>
+          <div className="events-modal-card" onClick={(event) => event.stopPropagation()}>
+            <button className="events-modal-close" onClick={() => setActiveImage(null)} aria-label="Close preview">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <img src={activeImage} alt="Open Mic Night preview" />
+            <div className="events-modal-actions">
+              <a className="events-modal-link" href={activeImage} target="_blank" rel="noopener noreferrer">Open full size</a>
+              <a className="btn-donate" href={activeImage} download>Download</a>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
