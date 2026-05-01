@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import openMicHtml from "../open-mic-night.html?raw";
 
 export default function EventsPage() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
   const images = useMemo(() => {
     if (!openMicHtml) return [] as string[];
     const doc = new DOMParser().parseFromString(openMicHtml, "text/html");
@@ -35,10 +36,7 @@ export default function EventsPage() {
     setIsPlaying(false);
   };
 
-  const openFullSize = () => {
-    if (!activeImage) return;
-    window.open(activeImage, "_blank", "noopener,noreferrer");
-  };
+  const showSwipeHint = activeIndex === 0;
 
   const downloadAsPng = async () => {
     if (!activeImage) return;
@@ -85,6 +83,25 @@ export default function EventsPage() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [activeIndex, images.length]);
 
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    touchStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    const start = touchStart.current;
+    if (!start) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    touchStart.current = null;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) goNext();
+    if (dx > 0) goPrev();
+  };
+
   return (
     <main className="events-page">
       <section className="events-intro">
@@ -128,7 +145,12 @@ export default function EventsPage() {
 
       {activeImage && (
         <div className="events-modal" onClick={closeModal}>
-          <div className="events-modal-card" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="events-modal-card"
+            onClick={(event) => event.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <button className="events-modal-close" onClick={closeModal} aria-label="Close preview">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -138,9 +160,14 @@ export default function EventsPage() {
             <button className="events-modal-nav next" onClick={goNext} aria-label="Next image">
               <span aria-hidden="true">&rsaquo;</span>
             </button>
-            <img src={activeImage} alt="Open Mic Night preview" />
+            <div className={showSwipeHint ? "events-modal-media show-swipe" : "events-modal-media"}>
+              <img className="events-modal-image" src={activeImage} alt="Open Mic Night preview" />
+              {showSwipeHint && <div className="events-modal-swipe">Swipe left or right</div>}
+            </div>
             <div className="events-modal-actions">
-              <button className="events-modal-link" onClick={openFullSize} type="button">Open full size</button>
+              <a className="events-modal-link" href={activeImage} target="_blank" rel="noopener noreferrer">
+                Open full size
+              </a>
               <button className="events-modal-link" onClick={() => setIsPlaying((prev) => !prev)} type="button">
                 {isPlaying ? "Pause slideshow" : "Play slideshow"}
               </button>

@@ -201,7 +201,8 @@ export default function App() {
         <div className="header-inner">
           <div className="header-brand">
             <div className="header-logobox">
-              <img src="/ms.png" alt="Mindful Circle" className="header-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
+              <a href="/" onClick={handleNav("/")}>
+              <img src="/ms.png" alt="Mindful Circle" className="header-logo-img" onError={e => (e.currentTarget.style.display = "none")} /></a>
               <span className="header-logo-fb">MC</span>
             </div>
             <div className="header-brand-text">
