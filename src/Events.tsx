@@ -191,6 +191,39 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                 <p className="events-detail-label">Time</p>
                 <p className="events-detail-value">{selectedEvent.time}</p>
               </div>
+              {selectedEvent.partners.length > 0 && (
+                <div>
+                  <p className="events-detail-label">Partners</p>
+                  <div className="events-partners-logos">
+                    {selectedEvent.partners.map((partner) => (
+                      partner.url ? (
+                        <a
+                          key={partner.name}
+                          className="events-partner-link"
+                          href={partner.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            className="events-partner-logo"
+                            src={partner.logo}
+                            alt={partner.name}
+                            loading="lazy"
+                          />
+                        </a>
+                      ) : (
+                        <img
+                          key={partner.name}
+                          className="events-partner-logo"
+                          src={partner.logo}
+                          alt={partner.name}
+                          loading="lazy"
+                        />
+                      )
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             {selectedEvent.activities.length > 0 && (
               <div className="events-detail-activities">
@@ -293,8 +326,9 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
           {events.map((event, index) => {
             const previewImages = event.galleryImages.slice(0, 3);
             const hasFlyer = event.status === "Upcoming" && event.flyerImage;
+            const isLeadUpcoming = index === 0 && event.status === "Upcoming";
             return (
-              <article className="event-card" key={event.slug}>
+              <article className={`event-card${isLeadUpcoming ? " event-card-featured" : ""}`} key={event.slug}>
                 <div className="event-card-top">
                   <div className="event-date-stack">
                     <span className="event-date-month">{event.date.month}</span>

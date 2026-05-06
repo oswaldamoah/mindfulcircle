@@ -14,6 +14,7 @@ export type EventMeta = {
   date: EventDate;
   highlight: string;
   activities: string[];
+  partners: { name: string; logo: string; url?: string }[];
   flyerImage?: string;
 };
 
@@ -22,19 +23,20 @@ export const eventsData: EventMeta[] = [
     slug: "color-picnic",
     title: "The Color Picnic",
     summary:
-      "Move. Connect. Belong. A vibrant wellness experience of movement, connection, games, music, and good vibes.",
+      "A wellness experience of music, games, and good vibes.",
     location: "Aburi Botanical Gardens",
     time: "6:00AM",
     status: "Upcoming",
     date: { month: "Jun", day: "06", year: "2026" },
     highlight: "Wear your color with pride. Come as you are.",
     activities: [
-      "Wellness Walk (Peduase  Aburi)",
+      "Wellness Walk (Peduase to Aburi)",
       "Group Games & Challenges",
       "Meaningful Conversations",
       "Picnic & Music",
       "Giveaways & Surprises",
     ],
+    partners: [],
     flyerImage: "/events/color-picnic-flyer.jpg",
   },
   {
@@ -47,5 +49,12 @@ export const eventsData: EventMeta[] = [
     date: { month: "May", day: "18", year: "2026" },
     highlight: "Spotlighted voices, acoustic sets, and community storytelling.",
     activities: [],
+    partners: [
+      {
+        name: "Hopeful Nkomo",
+        logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOptzBTKMgYDPjD-z24mGbRJUxKUHpm_ix6w&s",
+        url: "https://www.instagram.com/hopefulnkomo/",
+      },
+    ],
   },
 ];
