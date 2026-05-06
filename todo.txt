@@ -1,0 +1,1 @@
+the arrows are intersecting with the container. they should be either in or out of the container. preferrably out. also mobile version should have swipe instead of arrows

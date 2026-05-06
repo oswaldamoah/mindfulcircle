@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import EventsPage from "./Events";
+import { eventsData } from "./eventsData";
 
 const copyToClipboard = (text: string) => {
   if (navigator?.clipboard?.writeText) {
@@ -152,12 +153,20 @@ export default function App() {
   const [modal, setModal] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [path, setPath] = useState(() => window.location.pathname);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const handlePop = () => setPath(window.location.pathname);
     window.addEventListener("popstate", handlePop);
     return () => window.removeEventListener("popstate", handlePop);
   }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
   const copy = (text: string, key: string) => {
     copyToClipboard(text);
@@ -166,7 +175,17 @@ export default function App() {
   };
 
   const openModal = () => setModal(true);
-  const isEvents = path === "/events";
+  const isEventsList = path === "/events";
+  const isEventsDetail = path.startsWith("/events/");
+  const normalizeSlug = (value: string) =>
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/%20/g, " ")
+      .replace(/\s+/g, "-")
+      .replace(/_+/g, "-");
+  const rawSlug = isEventsDetail ? decodeURIComponent(path.replace("/events/", "")) : "";
+  const eventSlug = isEventsDetail ? normalizeSlug(rawSlug) : null;
   const handleNav = (href: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (!href.startsWith("/")) return;
     event.preventDefault();
@@ -174,6 +193,7 @@ export default function App() {
     const targetPath = nextPath || "/";
     window.history.pushState({}, "", targetPath + (hash ? `#${hash}` : ""));
     setPath(targetPath);
+    setMenuOpen(false);
     if (hash) {
       setTimeout(() => {
         const target = document.getElementById(hash);
@@ -181,14 +201,16 @@ export default function App() {
       }, 0);
     }
   };
-  const navItems = isEvents
+  const hasUpcomingEvents = eventsData.some((event) => event.status === "Upcoming");
+  const navItems = (isEventsList || isEventsDetail)
     ? [
         { label: "Home", href: "/" },
+        { label: "Events", href: "/events", highlight: hasUpcomingEvents },
         { label: "Donate", href: "/#donate" },
       ]
     : [
         { label: "About", href: "#about" },
-        { label: "Events", href: "/events" },
+        { label: "Events", href: "/events", highlight: hasUpcomingEvents },
         { label: "Donate", href: "#donate" },
       ];
 
@@ -212,14 +234,55 @@ export default function App() {
           </div>
           <nav className="header-nav">
             {navItems.map((item) => (
-              <a key={item.href} href={item.href} onClick={handleNav(item.href)}>{item.label}</a>
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={handleNav(item.href)}
+                className={item.highlight ? "nav-dot" : undefined}
+              >
+                {item.label}
+              </a>
             ))}
           </nav>
+          <button
+            className={`menu-toggle${hasUpcomingEvents ? " has-dot" : ""}`}
+            type="button"
+            aria-label="Open menu"
+            onClick={() => setMenuOpen(true)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </header>
 
-      {isEvents ? (
+      {menuOpen && (
+        <div className="menu-overlay" onClick={() => setMenuOpen(false)}>
+          <div className="menu-panel" onClick={(event) => event.stopPropagation()}>
+            <button className="menu-close" type="button" onClick={() => setMenuOpen(false)} aria-label="Close menu">
+              &times;
+            </button>
+            <div className="menu-links">
+              {navItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={handleNav(item.href)}
+                  className={item.highlight ? "nav-dot" : undefined}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEventsList ? (
         <EventsPage />
+      ) : eventSlug ? (
+        <EventsPage selectedSlug={eventSlug} />
       ) : (
         <>
           {/* ── Hero Section── */}
