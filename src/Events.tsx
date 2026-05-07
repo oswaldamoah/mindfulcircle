@@ -30,7 +30,11 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   const [isPlaying, setIsPlaying] = useState(false);
   const [standaloneImage, setStandaloneImage] = useState<string | null>(null);
   const [standaloneTitle, setStandaloneTitle] = useState<string | null>(null);
+  const [widgetStatus, setWidgetStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+  const [widgetReloadToken, setWidgetReloadToken] = useState(0);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const widgetAttempts = useRef(0);
+  const widgetTimeout = useRef<number | null>(null);
   const openMicImages = useMemo(() => parseGalleryImages(openMicHtml), []);
   const events = useMemo<EventItem[]>(
     () =>
@@ -119,6 +123,79 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [activeIndex, galleryImages.length]);
+
+  useEffect(() => {
+    if (selectedEvent?.slug !== "color-picnic") {
+      setWidgetStatus("idle");
+      return;
+    }
+
+    const config = {
+      maxRetries: 3,
+      retryDelay: 2000,
+      loadTimeout: 15000,
+      widgetUrl: "https://egotickets.com/embed/the-color-picnic-mindful-circle.js?skip_mobile=true&v=2.1",
+    };
+
+    const cleanupTimeout = () => {
+      if (widgetTimeout.current) {
+        window.clearTimeout(widgetTimeout.current);
+        widgetTimeout.current = null;
+      }
+    };
+
+    const removeScript = () => {
+      const existing = document.querySelector("script[data-egotickets='color-picnic']");
+      if (existing) existing.remove();
+    };
+
+    const scheduleRetry = () => {
+      if (widgetAttempts.current < config.maxRetries) {
+        window.setTimeout(loadWidget, config.retryDelay);
+      } else {
+        setWidgetStatus("error");
+      }
+    };
+
+    const loadWidget = () => {
+      widgetAttempts.current += 1;
+      setWidgetStatus("loading");
+      cleanupTimeout();
+      removeScript();
+
+      widgetTimeout.current = window.setTimeout(() => {
+        scheduleRetry();
+      }, config.loadTimeout);
+
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.async = true;
+      script.src = config.widgetUrl;
+      script.dataset.egotickets = "color-picnic";
+
+      script.onload = () => {
+        cleanupTimeout();
+        setWidgetStatus("loaded");
+      };
+
+      script.onerror = () => {
+        cleanupTimeout();
+        scheduleRetry();
+      };
+
+      const target = document.getElementsByTagName("head")[0]
+        || document.getElementsByTagName("body")[0]
+        || document.documentElement;
+      target.appendChild(script);
+    };
+
+    widgetAttempts.current = 0;
+    loadWidget();
+
+    return () => {
+      cleanupTimeout();
+    };
+  }, [selectedEvent?.slug, widgetReloadToken]);
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     const touch = event.touches[0];
@@ -235,37 +312,84 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                 </ul>
               </div>
             )}
-            <div className="events-detail-actions">
-              {selectedEvent.galleryImages.length > 0 ? (
-                <a className="btn-donate" href="#gallery">View gallery</a>
-              ) : (
-                <button className="btn-donate" type="button" disabled>Gallery coming soon</button>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section id="gallery" className="events-gallery-section">
-          <div className="events-gallery-header">
-            <p className="events-gallery-body">Tap any photo to preview and download.</p>
-          </div>
-          <div className="events-gallery-grid">
-            {galleryImages.length === 0 ? (
-              <div className="events-gallery-empty">Gallery images will appear here once loaded.</div>
-            ) : (
-              galleryImages.map((src, index) => (
-                <button
-                  key={`${src}-${index}`}
-                  className="events-gallery-item"
-                  type="button"
-                  onClick={() => setActiveIndex(index)}
-                >
-                  <img src={src} alt={`${selectedEvent.title} ${index + 1}`} loading="lazy" />
-                </button>
-              ))
+            {(selectedEvent.galleryImages.length > 0
+              || selectedEvent.slug === "color-picnic"
+              || Boolean(selectedEvent.flyerImage)) && (
+              <div className="events-detail-actions">
+                <div className="events-detail-actions-row">
+                  {selectedEvent.slug === "color-picnic" && (
+                    <a className="btn-donate events-register-btn" href="#tickets">Register now</a>
+                  )}
+                  {selectedEvent.galleryImages.length > 0 && (
+                    <a className="btn-donate" href="#gallery">View gallery</a>
+                  )}
+                  {selectedEvent.flyerImage && (
+                    <button
+                      className="events-detail-link"
+                      type="button"
+                      onClick={() => {
+                        setStandaloneImage(selectedEvent.flyerImage || null);
+                        setStandaloneTitle(selectedEvent.title);
+                      }}
+                    >
+                      View flyer
+                    </button>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </section>
+
+        {selectedEvent.slug === "color-picnic" && (
+          <section id="tickets" className="mc-tickets-section">
+            <div className="mc-tickets-card">
+              <div className="mc-tickets-embed">
+                <div
+                  id="egotickets-widget-container"
+                  className="egoticket_tickets"
+                  aria-live="polite"
+                  aria-busy={widgetStatus !== "loaded"}
+                />
+                {widgetStatus !== "loaded" && (
+                  <div className={`mc-tickets-overlay${widgetStatus === "error" ? " is-error" : ""}`}>
+                    <div className="mc-tickets-spinner" aria-hidden="true" />
+                    <p className="mc-tickets-overlay-title">
+                      {widgetStatus === "error" ? "We couldn't load tickets" : "Loading tickets"}
+                    </p>
+                    <p className="mc-tickets-overlay-body">
+                      {widgetStatus === "error"
+                        ? "Please check your connection or grab tickets directly on eGotickets."
+                        : "Bringing in the live ticket options from eGotickets."}
+                    </p>
+                    {widgetStatus === "error" && (
+                      <div className="mc-tickets-overlay-actions">
+                        <button
+                          className="mc-tickets-btn"
+                          type="button"
+                          onClick={() => setWidgetReloadToken((prev) => prev + 1)}
+                        >
+                          Try again
+                        </button>
+                        <a
+                          className="mc-tickets-btn secondary"
+                          href="https://egotickets.com/events/the-color-picnic-mindful-circle"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View on eGotickets
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="mc-tickets-footer">Powered by eGotickets</div>
+            </div>
+          </section>
+        )}
+
+       
 
         {modalImage && (
           <div className="events-modal" onClick={closeModal}>

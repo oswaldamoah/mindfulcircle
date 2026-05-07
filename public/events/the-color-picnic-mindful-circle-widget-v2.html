@@ -1,0 +1,235 @@
+<!-- EgoTickets Widget v2.1 for The Color Picnic - Mindful Circle -->
+<!-- Modern, Basecoat-inspired widget with stone-neutral design -->
+<div class="egoticket_tickets" id="egotickets-widget-container">
+  <div style="
+    padding: 48px 24px;
+    text-align: center;
+    background: #fafaf9;
+    border: 1px solid #e7e5e4;
+    border-radius: 12px;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1c1917;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+  ">
+    <!-- Minimal spinner -->
+    <div style="
+      width: 24px;
+      height: 24px;
+      border: 2px solid #e7e5e4;
+      border-top-color: #78716c;
+      border-radius: 50%;
+      animation: egotickets-spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    "></div>
+    <div style="font-size: 15px; font-weight: 500; color: #44403c; margin-bottom: 6px;">
+      Loading tickets...
+    </div>
+    <div style="font-size: 13px; color: #a8a29e;">
+      eGotickets
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes egotickets-spin {
+    to { transform: rotate(360deg); }
+  }
+  #egotickets-widget-container * {
+    box-sizing: border-box;
+  }
+</style>
+
+<script type="text/javascript">
+(function() {
+  'use strict';
+
+  var WIDGET_CONFIG = {
+    maxRetries: 3,
+    retryDelay: 2000,
+    loadTimeout: 15000,
+    widgetUrl: 'https://egotickets.com/embed/the-color-picnic-mindful-circle.js?skip_mobile=true&v=2.1',
+    eventUrl: 'https://egotickets.com/events/the-color-picnic-mindful-circle'
+  };
+
+  var attempts = 0;
+  var loadTimeout;
+
+  // Design tokens for JS-generated UI
+  var STYLES = {
+    container: 'padding: 48px 24px; text-align: center; background: #fafaf9; ' +
+      'border: 1px solid #e7e5e4; border-radius: 12px; ' +
+      'font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; ' +
+      'min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;',
+    errorContainer: 'padding: 48px 24px; text-align: center; background: #fafaf9; ' +
+      'border: 1px solid #fecaca; border-radius: 12px; ' +
+      'font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; ' +
+      'min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;',
+    iconWrapper: 'width: 48px; height: 48px; background: #fef2f2; border-radius: 50%; ' +
+      'display: flex; align-items: center; justify-content: center; margin-bottom: 16px;',
+    errorIcon: 'width: 24px; height: 24px; color: #dc2626;',
+    title: 'font-size: 15px; font-weight: 600; color: #1c1917; margin-bottom: 6px;',
+    subtitle: 'font-size: 13px; color: #78716c; margin-bottom: 20px; max-width: 280px;',
+    primaryBtn: 'display: inline-flex; align-items: center; justify-content: center; gap: 8px; ' +
+      'background: #ff5722; color: white; border: none; padding: 10px 20px; ' +
+      'border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; ' +
+      'transition: background-color 0.15s ease; text-decoration: none;',
+    primaryBtnHover: 'background: #e64a19;',
+    secondaryBtn: 'display: inline-flex; align-items: center; justify-content: center; ' +
+      'background: transparent; color: #57534e; border: 1px solid #d6d3d1; padding: 10px 20px; ' +
+      'border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; ' +
+      'transition: background-color 0.15s ease; text-decoration: none; margin-top: 12px;',
+    secondaryBtnHover: 'background: #f5f5f4;',
+    footer: 'font-size: 12px; color: #a8a29e; margin-top: 20px;'
+  };
+
+  function showError(message, canRetry) {
+    var container = document.getElementById('egotickets-widget-container') ||
+                   document.querySelector('.egoticket_tickets');
+
+    if (!container) return;
+
+    // Reset outer container styles to prevent conflicts
+    container.style.cssText = '';
+
+    var errorIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: #dc2626;">' +
+      '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />' +
+      '</svg>';
+
+    var retryButton = canRetry ?
+      '<button onclick="loadEgoTicketsWidget()" style="' + STYLES.primaryBtn + '" ' +
+      'onmouseover="this.style.background=\'#e64a19\'" ' +
+      'onmouseout="this.style.background=\'#ff5722\'">' +
+      '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;">' +
+      '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />' +
+      '</svg>' +
+      'Try Again</button>' : '';
+
+    var fallbackLink = '<a href="' + WIDGET_CONFIG.eventUrl + '" target="_blank" style="' + STYLES.secondaryBtn + '" ' +
+      'onmouseover="this.style.background=\'#f5f5f4\'" ' +
+      'onmouseout="this.style.background=\'transparent\'">' +
+      'View on eGotickets</a>';
+
+    container.innerHTML =
+      '<div style="padding: 48px 24px; text-align: center; background: #fafaf9; border: 1px solid #fecaca; border-radius: 12px; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; min-height: 180px; box-sizing: border-box;">' +
+        '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">' +
+          '<div style="width: 48px; height: 48px; background: #fef2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">' + errorIconSvg + '</div>' +
+          '<div style="font-size: 15px; font-weight: 600; color: #1c1917; margin-bottom: 6px;">' + message + '</div>' +
+          '<div style="font-size: 13px; color: #78716c; margin-bottom: 20px; max-width: 280px;">Please check your connection and try again, or view tickets directly on our website.</div>' +
+          '<div style="display: flex; flex-direction: column; align-items: center; gap: 0;">' +
+            retryButton +
+            fallbackLink +
+          '</div>' +
+          '<div style="font-size: 12px; color: #a8a29e; margin-top: 20px;">eGotickets</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function loadEgoTicketsWidget() {
+    attempts++;
+
+    if (loadTimeout) {
+      clearTimeout(loadTimeout);
+    }
+
+    loadTimeout = setTimeout(function() {
+      console.warn('EgoTickets: Widget load timeout (attempt ' + attempts + ')');
+      if (attempts < WIDGET_CONFIG.maxRetries) {
+        setTimeout(loadEgoTicketsWidget, WIDGET_CONFIG.retryDelay);
+      } else {
+        showError('Unable to load tickets', true);
+      }
+    }, WIDGET_CONFIG.loadTimeout);
+
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.async = true;
+    script.src = WIDGET_CONFIG.widgetUrl;
+
+    script.onload = function() {
+      clearTimeout(loadTimeout);
+      console.log('EgoTickets: Widget loaded successfully');
+    };
+
+    script.onerror = function() {
+      clearTimeout(loadTimeout);
+      console.warn('EgoTickets: Failed to load widget script (attempt ' + attempts + ')');
+
+      if (attempts < WIDGET_CONFIG.maxRetries) {
+        setTimeout(loadEgoTicketsWidget, WIDGET_CONFIG.retryDelay);
+      } else {
+        showError('Unable to load tickets', true);
+      }
+    };
+
+    var target = document.getElementsByTagName('head')[0] ||
+                document.getElementsByTagName('body')[0] ||
+                document.documentElement;
+    target.appendChild(script);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadEgoTicketsWidget);
+  } else {
+    loadEgoTicketsWidget();
+  }
+
+  window.loadEgoTicketsWidget = loadEgoTicketsWidget;
+
+})();
+</script>
+
+<noscript>
+  <div style="
+    padding: 48px 24px;
+    text-align: center;
+    background: #fafaf9;
+    border: 1px solid #e7e5e4;
+    border-radius: 12px;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  ">
+    <div style="
+      width: 48px;
+      height: 48px;
+      background: #fef3c7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    ">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#d97706" style="width: 24px; height: 24px;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+      </svg>
+    </div>
+    <div style="font-size: 15px; font-weight: 600; color: #1c1917; margin-bottom: 6px;">
+      JavaScript Required
+    </div>
+    <div style="font-size: 13px; color: #78716c; margin-bottom: 20px;">
+      Enable JavaScript to view tickets, or visit our website directly.
+    </div>
+    <a href="https://egotickets.com/events/the-color-picnic-mindful-circle"
+       target="_blank"
+       style="
+         display: inline-flex;
+         align-items: center;
+         justify-content: center;
+         background: #ff5722;
+         color: white;
+         text-decoration: none;
+         padding: 10px 20px;
+         border-radius: 8px;
+         font-size: 14px;
+         font-weight: 500;
+       ">
+      View Tickets on eGotickets
+    </a>
+    <div style="font-size: 12px; color: #a8a29e; margin-top: 20px;">
+      eGotickets
+    </div>
+  </div>
+</noscript>
