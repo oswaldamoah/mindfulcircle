@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent, TouchEvent } from "react";
 import openMicHtml from "../open-mic-night.html?raw";
 import { eventsData, type EventMeta } from "./eventsData";
+import QRCode from "qrcode";
+import { Share2 } from "lucide-react";
 
 type EventItem = EventMeta & {
   galleryImages: string[];
@@ -30,11 +32,16 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   const [isPlaying, setIsPlaying] = useState(false);
   const [standaloneImage, setStandaloneImage] = useState<string | null>(null);
   const [standaloneTitle, setStandaloneTitle] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string>("");
+  const [shareTitle, setShareTitle] = useState<string>("");
+  const [shareCopied, setShareCopied] = useState(false);
   const [widgetStatus, setWidgetStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
   const [widgetReloadToken, setWidgetReloadToken] = useState(0);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const widgetAttempts = useRef(0);
   const widgetTimeout = useRef<number | null>(null);
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const openMicImages = useMemo(() => parseGalleryImages(openMicHtml), []);
   const events = useMemo<EventItem[]>(
     () =>
@@ -78,6 +85,89 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   };
 
   const showSwipeHint = isGalleryModal && activeIndex === 0;
+
+  const getEventLink = (slug: string) => `${window.location.origin}/events/${slug}`;
+
+  const openShare = (url: string, title: string) => {
+    setShareUrl(url);
+    setShareTitle(title);
+    setShareCopied(false);
+    setShareOpen(true);
+  };
+
+  const closeShare = () => {
+    setShareOpen(false);
+    setShareCopied(false);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const input = document.createElement("input");
+        input.value = shareUrl;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        input.remove();
+      }
+      setShareCopied(true);
+      window.setTimeout(() => setShareCopied(false), 2000);
+    } catch {
+      setShareCopied(false);
+    }
+  };
+
+  const handleShareApps = async () => {
+    if (!navigator?.share) return;
+    try {
+      await navigator.share({ title: shareTitle, url: shareUrl });
+    } catch {
+      // Ignore share cancellation.
+    }
+  };
+
+  const handleDownloadQr = () => {
+    const canvas = qrCanvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = "mindful-circle-event-qr.png";
+    link.click();
+  };
+
+  const shareModal = shareOpen ? (
+    <div className="share-modal" onClick={closeShare}>
+      <div className="share-card" onClick={(event) => event.stopPropagation()}>
+        <button className="share-close" onClick={closeShare} aria-label="Close share panel">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <p className="share-kicker">Share event</p>
+        <h3 className="share-title">{shareTitle}</h3>
+        <div className="share-actions">
+          <button className="share-btn" type="button" onClick={handleCopyLink}>
+            {shareCopied ? "Link copied" : "Copy link"}
+          </button>
+          <button
+            className="share-btn secondary"
+            type="button"
+            onClick={handleShareApps}
+            disabled={!navigator?.share}
+          >
+            Share to apps
+          </button>
+          <button className="share-btn secondary" type="button" onClick={handleDownloadQr}>
+            Download QR
+          </button>
+        </div>
+        <div className="share-qr">
+          <canvas ref={qrCanvasRef} aria-label="QR code" role="img" />
+          <p>Scan to open this event page.</p>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   const downloadAsPng = async () => {
     if (!modalImage) return;
@@ -125,8 +215,61 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   }, [activeIndex, galleryImages.length]);
 
   useEffect(() => {
+    if (!shareOpen || !shareUrl || !qrCanvasRef.current) return;
+    let isActive = true;
+    const canvas = qrCanvasRef.current;
+    const size = 220;
+    canvas.width = size;
+    canvas.height = size;
+
+    const renderQr = async () => {
+      try {
+        await QRCode.toCanvas(canvas, shareUrl, {
+          errorCorrectionLevel: "H",
+          margin: 2,
+          width: size,
+          color: {
+            dark: "#1c0b2b",
+            light: "#ffffff",
+          },
+        });
+        const ctx = canvas.getContext("2d");
+        if (!ctx || !isActive) return;
+        const logo = new Image();
+        logo.src = "/ms.png";
+        logo.onload = () => {
+          if (!isActive) return;
+          const logoSize = size * 0.22;
+          const x = (size - logoSize) / 2;
+          const y = (size - logoSize) / 2;
+          ctx.drawImage(logo, x, y, logoSize, logoSize);
+        };
+      } catch {
+        // QR rendering failed.
+      }
+    };
+
+    renderQr();
+    return () => {
+      isActive = false;
+    };
+  }, [shareOpen, shareUrl]);
+
+  useEffect(() => {
+    const removeScript = () => {
+      const existing = document.querySelector("script[data-egotickets='color-picnic']");
+      if (existing) existing.remove();
+    };
+
+    const clearWidgetContainer = () => {
+      const container = document.getElementById("egotickets-widget-container");
+      if (container) container.innerHTML = "";
+    };
+
     if (selectedEvent?.slug !== "color-picnic") {
       setWidgetStatus("idle");
+      removeScript();
+      clearWidgetContainer();
       return;
     }
 
@@ -142,11 +285,6 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
         window.clearTimeout(widgetTimeout.current);
         widgetTimeout.current = null;
       }
-    };
-
-    const removeScript = () => {
-      const existing = document.querySelector("script[data-egotickets='color-picnic']");
-      if (existing) existing.remove();
     };
 
     const scheduleRetry = () => {
@@ -194,6 +332,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
 
     return () => {
       cleanupTimeout();
+      removeScript();
     };
   }, [selectedEvent?.slug, widgetReloadToken]);
 
@@ -268,6 +407,13 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                 <p className="events-detail-label">Time</p>
                 <p className="events-detail-value">{selectedEvent.time}</p>
               </div>
+              
+              {selectedEvent.slug === "color-picnic" && (
+                <div>
+                  <p className="events-detail-label">Merch</p>
+                  <a className="events-detail-value events-detail-link-inline" href="/merch#cap">Caps available now!</a>
+                </div>
+              )}
               {selectedEvent.partners.length > 0 && (
                 <div>
                   <p className="events-detail-label">Partners</p>
@@ -304,7 +450,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
             </div>
             {selectedEvent.activities.length > 0 && (
               <div className="events-detail-activities">
-                <p className="events-detail-label">Activities</p>
+                <p className="events-detail-label">DETAILS</p>
                 <ul className="events-activity-list">
                   {selectedEvent.activities.map((activity) => (
                     <li key={activity}>{activity}</li>
@@ -335,6 +481,15 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                       View flyer
                     </button>
                   )}
+
+                  <button
+                    className="events-share-icon"
+                    type="button"
+                    onClick={() => openShare(getEventLink(selectedEvent.slug), selectedEvent.title)}
+                    aria-label="Share event"
+                  >
+                    <Share2 size={18} aria-hidden="true" />
+                  </button>
                 </div>
               </div>
             )}
@@ -343,54 +498,18 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
 
         {selectedEvent.slug === "color-picnic" && (
           <section id="tickets" className="mc-tickets-section">
-            <div className="mc-tickets-card">
-              <div className="mc-tickets-embed">
-                <div
-                  id="egotickets-widget-container"
-                  className="egoticket_tickets"
-                  aria-live="polite"
-                  aria-busy={widgetStatus !== "loaded"}
-                />
-                {widgetStatus !== "loaded" && (
-                  <div className={`mc-tickets-overlay${widgetStatus === "error" ? " is-error" : ""}`}>
-                    <div className="mc-tickets-spinner" aria-hidden="true" />
-                    <p className="mc-tickets-overlay-title">
-                      {widgetStatus === "error" ? "We couldn't load tickets" : "Loading tickets"}
-                    </p>
-                    <p className="mc-tickets-overlay-body">
-                      {widgetStatus === "error"
-                        ? "Please check your connection or grab tickets directly on eGotickets."
-                        : "Bringing in the live ticket options from eGotickets."}
-                    </p>
-                    {widgetStatus === "error" && (
-                      <div className="mc-tickets-overlay-actions">
-                        <button
-                          className="mc-tickets-btn"
-                          type="button"
-                          onClick={() => setWidgetReloadToken((prev) => prev + 1)}
-                        >
-                          Try again
-                        </button>
-                        <a
-                          className="mc-tickets-btn secondary"
-                          href="https://egotickets.com/events/the-color-picnic-mindful-circle"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View on eGotickets
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="mc-tickets-footer">Powered by eGotickets</div>
-            </div>
+            <div
+              id="egotickets-widget-container"
+              className="egoticket_tickets"
+              aria-live="polite"
+              aria-busy={widgetStatus !== "loaded"}
+            />
           </section>
         )}
 
        
 
+        {shareModal}
         {modalImage && (
           <div className="events-modal" onClick={closeModal}>
             <div
@@ -505,6 +624,14 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                   <a className="btn-donate" href={`/events/${event.slug}`} onClick={handleNav(`/events/${event.slug}`)}>
                     {event.status === "Upcoming" ? "Register" : "View gallery"}
                   </a>
+                  <button
+                    className="event-share-btn"
+                    type="button"
+                    onClick={() => openShare(getEventLink(event.slug), event.title)}
+                    aria-label="Share event"
+                  >
+                    <Share2 size={16} aria-hidden="true" />
+                  </button>
                   <span className="event-card-rank">#{String(index + 1).padStart(2, "0")}</span>
                 </div>
               </article>
@@ -512,6 +639,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
           })}
         </div>
       </section>
+      {shareModal}
       {modalImage && (
         <div className="events-modal" onClick={closeModal}>
           <div
