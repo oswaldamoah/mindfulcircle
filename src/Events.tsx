@@ -521,8 +521,32 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
             />
           </section>
         )}
-
-       
+        {selectedEvent.galleryImages.length > 0 && (
+          <section id="gallery" className="events-gallery-section">
+            <div className="events-gallery-header">
+              <h2 className="events-gallery-title">Gallery</h2>
+              <p className="events-gallery-body">
+                Tap any photo to open the full gallery viewer.
+              </p>
+            </div>
+            <div className="events-gallery-grid">
+              {selectedEvent.galleryImages.map((src, index) => (
+                <button
+                  className="events-gallery-item"
+                  type="button"
+                  key={`${selectedEvent.slug}-${index}`}
+                  onClick={() => {
+                    setStandaloneImage(null);
+                    setStandaloneTitle(null);
+                    setActiveIndex(index);
+                  }}
+                >
+                  <img src={src} alt={`${selectedEvent.title} gallery ${index + 1}`} loading="lazy" />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {shareModal}
         {modalImage && (
