@@ -430,6 +430,9 @@ strong { font-weight: 600; color: var(--p800); }
   flex-direction: column;
   cursor: pointer;
   position: relative;
+  flex-shrink: 0;
+  min-width: 40px;
+  min-height: 40px;
 }
 .menu-toggle span {
   width: 18px;
@@ -637,13 +640,14 @@ strong { font-weight: 600; color: var(--p800); }
 .menu-toggle.has-dot::after {
   content: "";
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 7px;
-  height: 7px;
+  /* position the dot slightly outside the top-right so it doesn't overlap when the button narrows */
+  top: -6px;
+  right: -6px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #ff3b30;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.9);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.92);
 }
 .menu-overlay {
   position: fixed;

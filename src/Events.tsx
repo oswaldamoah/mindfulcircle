@@ -226,30 +226,46 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
     if (!shareOpen || !shareUrl || !qrCanvasRef.current) return;
     let isActive = true;
     const canvas = qrCanvasRef.current;
-    const size = 220;
-    canvas.width = size;
-    canvas.height = size;
+    // Render QR at high DPI so the embedded logo (ms.png) remains crisp.
+    const displaySize = 220; // CSS pixels for display
+    const ratio = Math.max(1, window.devicePixelRatio || 1);
+    const pixelSize = Math.ceil(displaySize * ratio);
+
+    // set canvas internal resolution to pixelSize but keep CSS size fixed
+    canvas.width = pixelSize;
+    canvas.height = pixelSize;
+    canvas.style.width = `${displaySize}px`;
+    canvas.style.height = `${displaySize}px`;
 
     const renderQr = async () => {
       try {
         await QRCode.toCanvas(canvas, shareUrl, {
           errorCorrectionLevel: "H",
-          margin: 2,
-          width: size,
-          color: {
-            dark: "#1c0b2b",
-            light: "#ffffff",
-          },
+          margin: 2 * ratio,
+          width: pixelSize,
+          color: { dark: "#1c0b2b", light: "#ffffff" },
         });
+
         const ctx = canvas.getContext("2d");
         if (!ctx || !isActive) return;
+
         const logo = new Image();
-        logo.src = "/ms.png";
+        // Use base-aware URL so the asset loads in production and dev
+        logo.src = `${import.meta.env.BASE_URL}ms.png`;
+        logo.crossOrigin = "anonymous";
         logo.onload = () => {
           if (!isActive) return;
-          const logoSize = size * 0.22;
-          const x = (size - logoSize) / 2;
-          const y = (size - logoSize) / 2;
+          // Draw the logo directly (no background). Increase size for better sharpness.
+          // Reduce logo size by 30% to improve perceived sharpness when downscaled
+          const logoSize = Math.floor(pixelSize * 0.34 * 0.7);
+          const x = Math.floor((pixelSize - logoSize) / 2);
+          const y = Math.floor((pixelSize - logoSize) / 2);
+          if (ctx) {
+            ctx.imageSmoothingEnabled = true;
+            // use highest smoothing available for better downscale quality
+            // @ts-ignore
+            ctx.imageSmoothingQuality = 'high';
+          }
           ctx.drawImage(logo, x, y, logoSize, logoSize);
         };
       } catch {
