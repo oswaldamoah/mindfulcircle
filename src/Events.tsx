@@ -13,9 +13,18 @@ const parseGalleryImages = (html: string) => {
   if (!html) return [] as string[];
   const doc = new DOMParser().parseFromString(html, "text/html");
   const srcs = Array.from(doc.images)
-    .map((img) => img.src)
+    .map((img) => img.getAttribute("src") || "")
     .filter((src): src is string => Boolean(src));
-  return Array.from(new Set(srcs));
+  if (srcs.length > 0) return Array.from(new Set(srcs));
+
+  // Fallback for very large HTML strings where DOM parsing can drop nodes.
+  const fallback: string[] = [];
+  const imgSrcRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+  let match: RegExpExecArray | null;
+  while ((match = imgSrcRegex.exec(html))) {
+    if (match[1]) fallback.push(match[1]);
+  }
+  return Array.from(new Set(fallback));
 };
 
 const usePopstateNav = () => {
@@ -37,7 +46,6 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   const [shareTitle, setShareTitle] = useState<string>("");
   const [shareCopied, setShareCopied] = useState(false);
   const [widgetStatus, setWidgetStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
-  const [widgetReloadToken, setWidgetReloadToken] = useState(0);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const widgetAttempts = useRef(0);
   const widgetTimeout = useRef<number | null>(null);
@@ -266,10 +274,17 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
       if (container) container.innerHTML = "";
     };
 
+    const removeWidgetFrames = () => {
+      document
+        .querySelectorAll<HTMLIFrameElement>("iframe[src*='egotickets.com']")
+        .forEach((frame) => frame.remove());
+    };
+
     if (selectedEvent?.slug !== "color-picnic") {
       setWidgetStatus("idle");
       removeScript();
       clearWidgetContainer();
+      removeWidgetFrames();
       return;
     }
 
@@ -334,7 +349,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
       cleanupTimeout();
       removeScript();
     };
-  }, [selectedEvent?.slug, widgetReloadToken]);
+  }, [selectedEvent?.slug]);
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     const touch = event.touches[0];
