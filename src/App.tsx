@@ -9,6 +9,8 @@ const copyToClipboard = (text: string) => {
   }
 };
 
+const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, "")}`;
+
 // Counts up once when element enters viewport
 function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
   const [count, setCount] = useState(0);
@@ -76,9 +78,10 @@ function DonateModal({ onClose }: { onClose: () => void }) {
   const wa = (msg: string) => `https://wa.me/233599078844?text=${encodeURIComponent(msg)}`;
 
   const channels = [
-    { id: "telecel", label: "Telecel Cash",                holder: "Eugene Kwesi Arkhurst", num: "0206238800",    nk: "tn", mk: "tm", cls: "logo-telecel",  logo: "/tcash.png", alt: "Telecel", fb: "TCL",  wa: true  },
-    { id: "bank",    label: "Stanbic Bank, West Hills Mall", holder: "Gerald Kwesi Amoako", num: "9040014155508", nk: "bn", mk: "bm", cls: "logo-bank",     logo: "/stanbic.png", alt: "Stanbic", fb: "SB",   wa: false },
+    { id: "telecel", label: "Telecel Cash",                holder: "Eugene Kwesi Arkhurst", num: "0206238800",    nk: "tn", mk: "tm", cls: "logo-telecel",  logo: assetUrl("/tcash.png"), alt: "Telecel", wa: true  },
+    { id: "bank",    label: "Stanbic Bank, West Hills Mall", holder: "Gerald Kwesi Amoako", num: "9040014155508", nk: "bn", mk: "bm", cls: "logo-bank",     logo: assetUrl("/stanbic.png"), alt: "Stanbic", wa: false },
   ] as const;
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-box" onClick={e => e.stopPropagation()}>
@@ -115,7 +118,6 @@ function DonateModal({ onClose }: { onClose: () => void }) {
               <div className="ch-top">
                 <div className={`ch-logo ${c.cls}`}>
                   <img src={c.logo} alt={c.alt} className="ch-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
-                  <span className="ch-logo-fb">{c.fb}</span>
                 </div>
                 <div className="ch-info">
                   <p className="ch-name">{c.label}</p>
@@ -412,14 +414,13 @@ export default function App() {
                 {/* Quick-copy channel cards */}
                 <div className="qc-col">
                   {[
-                    { label: "Telecel Cash",                    owner: "Eugene Kwesi Arkhurst", num: "0206238800",    key: "tcl",  cls: "logo-telecel",  logo: "/tcash.png", alt: "Telecel Cash",  fb: "TCL" },
-                    { label: "Stanbic Bank, West Hills Mall",  owner: "Gerald Kwesi Amoako",   num: "9040014155508", key: "bank", cls: "logo-bank",     logo: "/stanbic.png", alt: "Stanbic Bank",  fb: "SB"  },
+                    { label: "Telecel Cash",                    owner: "Eugene Kwesi Arkhurst", num: "0206238800",    key: "tcl",  cls: "logo-telecel",  logo: assetUrl("/tcash.png"), alt: "Telecel Cash" },
+                    { label: "Stanbic Bank, West Hills Mall",  owner: "Gerald Kwesi Amoako",   num: "9040014155508", key: "bank", cls: "logo-bank",     logo: assetUrl("/stanbic.png"), alt: "Stanbic Bank"  },
                   ].map(c => (
                     <div className="qc-card" key={c.key}>
                       <div className="qc-card-top">
                         <div className={`qc-logo ${c.cls}`}>
                           <img src={c.logo} alt={c.alt} className="qc-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
-                          <span className="qc-logo-fb">{c.fb}</span>
                         </div>
                         <div>
                           <p className="qc-label">{c.label}</p>

@@ -263,6 +263,26 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
     };
   }, [shareOpen, shareUrl]);
 
+  // Small haptics support: vibrate on pointerdown for primary CTAs (non-intrusive)
+  useEffect(() => {
+    const handler = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target || !target.closest) return;
+      const el = target.closest('.btn-donate, .mc-tickets-btn, .cta-donate-btn, .share-btn, .event-share-btn');
+      if (!el) return;
+      try {
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          (navigator as any).vibrate(10);
+        }
+      } catch {
+        // ignore vibration errors
+      }
+    };
+
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, []);
+
   useEffect(() => {
     const removeScript = () => {
       const existing = document.querySelector("script[data-egotickets='color-picnic']");
