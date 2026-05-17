@@ -59,6 +59,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
       })),
     [openMicImages]
   );
+  
   const selectedEvent = selectedSlug
     ? events.find((event) => event.slug === selectedSlug) || null
     : null;
@@ -203,6 +204,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
     }
   };
 
+  
   useEffect(() => {
     if (!isPlaying || activeIndex === null || !isGalleryModal) return;
     const timer = window.setInterval(() => {
@@ -715,6 +717,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
         </div>
       </section>
       {shareModal}
+      
       {modalImage && (
         <div className="events-modal" onClick={closeModal}>
           <div

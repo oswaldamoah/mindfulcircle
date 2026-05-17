@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import QRCode from "qrcode";
+import { ChevronLeft, ChevronRight, Download, Gift, Images, Share2, X } from "lucide-react";
 import EventsPage from "./Events";
 import { eventsData } from "./eventsData";
 import MerchPage from "./Merch";
@@ -49,8 +51,491 @@ const WAIcon = () => (
   </svg>
 );
 
+// === BIRTHDAY ANNIVERSARY FEATURE: START ===
+// Disable the entire birthday experience by changing this to false.
+const BIRTHDAY_FEATURE_ENABLED = true;
+const BIRTHDAY_SEEN_STORAGE_KEY = "mc_birthday_seen_v2";
+const BIRTHDAY_AUTO_ADVANCE_MS = 10200;
 
-// ── Donate Modal ─────────────────────────────────────────────────────────────
+type BirthdaySlide = {
+  image?: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  note: string;
+  finale?: boolean;
+};
+
+const BIRTHDAY_FLYERS = [
+  assetUrl("events/1 year anniversary/mc1_1.jpg"),
+  assetUrl("events/1 year anniversary/mc1_2.jpg"),
+  assetUrl("events/1 year anniversary/mc1_3.jpg"),
+];
+const BIRTHDAY_LOGO = assetUrl("/ms.png");
+
+const BIRTHDAY_SLIDES: BirthdaySlide[] = [
+  {
+    image: BIRTHDAY_FLYERS[0],
+    eyebrow: "Happy 1st Anniversary",
+    title: "One year of choosing hope.",
+    body: "Mindful Circle began as a brave idea: create rooms where young people can breathe, be heard, and remember that their story is still unfolding.",
+    note: "Every circle, flyer, conversation, and campaign has carried the same message: healing is possible when nobody has to walk alone.",
+  },
+  {
+    image: BIRTHDAY_FLYERS[1],
+    eyebrow: "The Journey",
+    title: "Safe spaces that change lives.",
+    body: "From peer support to awareness sessions, this movement has been building gentle spaces for mental health, honesty, recovery, and community care.",
+    note: "The work is personal, practical, and hopeful: one open conversation can become the start of someone's next breath.",
+  },
+  {
+    image: BIRTHDAY_FLYERS[2],
+    eyebrow: "The Future",
+    title: "More healing. More belonging.",
+    body: "This birthday is not only a celebration. It is a promise to keep showing up with resources, compassion, advocacy, and creative moments of relief.",
+    note: "Thank you for standing with a youth-led movement making mental health feel visible, human, and reachable.",
+  },
+  {
+    eyebrow: "Mindful Circle @ 1",
+    title: "A year of hope, held together.",
+    body: "This is our first birthday, but the mission is bigger than a date: keep making mental health support feel safe, visible, and close enough to reach.",
+    note: "View the anniversary flyers again, download them, or share Mindful Circle with someone who needs a softer place to land.",
+    finale: true,
+  },
+];
+
+const BIRTHDAY_CONFETTI = [
+  { left: 3, delay: -500, duration: 5200, color: "#f97373", width: 9, height: 15 },
+  { left: 8, delay: -1800, duration: 6100, color: "#ffd166", width: 7, height: 13 },
+  { left: 14, delay: -2400, duration: 5700, color: "#3fb7a3", width: 8, height: 14 },
+  { left: 19, delay: -700, duration: 6600, color: "#b07ad4", width: 10, height: 16 },
+  { left: 25, delay: -3100, duration: 5900, color: "#ff8a5b", width: 7, height: 12 },
+  { left: 31, delay: -1400, duration: 6400, color: "#f7c948", width: 9, height: 13 },
+  { left: 38, delay: -2600, duration: 5400, color: "#8b52b5", width: 8, height: 15 },
+  { left: 45, delay: -900, duration: 7000, color: "#53c2df", width: 7, height: 12 },
+  { left: 52, delay: -3400, duration: 5800, color: "#ff5a8a", width: 9, height: 15 },
+  { left: 58, delay: -1200, duration: 6300, color: "#6b3a92", width: 8, height: 13 },
+  { left: 64, delay: -2800, duration: 5500, color: "#ffd166", width: 10, height: 16 },
+  { left: 71, delay: -400, duration: 6800, color: "#2fbf9b", width: 7, height: 12 },
+  { left: 77, delay: -2100, duration: 6000, color: "#f08a5d", width: 8, height: 14 },
+  { left: 84, delay: -1600, duration: 6500, color: "#b07ad4", width: 9, height: 13 },
+  { left: 91, delay: -3000, duration: 5600, color: "#f97373", width: 7, height: 12 },
+  { left: 97, delay: -1000, duration: 7200, color: "#53c2df", width: 8, height: 15 },
+];
+
+function BirthdayAnniversaryFeature() {
+  const [showBirthday, setShowBirthday] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const slideCount = BIRTHDAY_SLIDES.length;
+  const active = BIRTHDAY_SLIDES[activeSlide];
+  const isFinalSlide = Boolean(active.finale);
+  const shareUrl = `${window.location.origin}/`;
+  const shareTitle = "Mindful Circle @ 1";
+
+  useEffect(() => {
+    if (!BIRTHDAY_FEATURE_ENABLED) return;
+
+    const timer = window.setTimeout(() => {
+      let shouldOpen = true;
+
+      try {
+        shouldOpen = !sessionStorage.getItem(BIRTHDAY_SEEN_STORAGE_KEY);
+        if (shouldOpen) sessionStorage.setItem(BIRTHDAY_SEEN_STORAGE_KEY, "1");
+      } catch {
+        shouldOpen = true;
+      }
+
+      if (shouldOpen) setShowBirthday(true);
+    }, 650);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!showBirthday || !isAutoPlaying || slideCount < 2) return;
+
+    const timer = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % slideCount);
+    }, BIRTHDAY_AUTO_ADVANCE_MS);
+
+    return () => window.clearInterval(timer);
+  }, [showBirthday, isAutoPlaying, slideCount]);
+
+  useEffect(() => {
+    if (!showBirthday) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showBirthday]);
+
+  useEffect(() => {
+    if (!showBirthday) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowBirthday(false);
+      } else if (event.key === "ArrowRight") {
+        goToSlide(activeSlide + 1);
+      } else if (event.key === "ArrowLeft") {
+        goToSlide(activeSlide - 1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showBirthday, activeSlide, slideCount]);
+
+  useEffect(() => {
+    if (!shareOpen || !qrCanvasRef.current) return;
+
+    let isActive = true;
+    const canvas = qrCanvasRef.current;
+    const displaySize = 220;
+    const ratio = Math.max(1, window.devicePixelRatio || 1);
+    const pixelSize = Math.ceil(displaySize * ratio);
+
+    canvas.width = pixelSize;
+    canvas.height = pixelSize;
+    canvas.style.width = `${displaySize}px`;
+    canvas.style.height = `${displaySize}px`;
+
+    const renderQr = async () => {
+      try {
+        await QRCode.toCanvas(canvas, shareUrl, {
+          errorCorrectionLevel: "H",
+          margin: 2 * ratio,
+          width: pixelSize,
+          color: { dark: "#1c0b2b", light: "#ffffff" },
+        });
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx || !isActive) return;
+
+        const logo = new Image();
+        logo.crossOrigin = "anonymous";
+        logo.src = `${import.meta.env.BASE_URL}ms.png`;
+        logo.onload = () => {
+          if (!isActive) return;
+
+          const logoSize = Math.floor(pixelSize * 0.24);
+          const x = Math.floor((pixelSize - logoSize) / 2);
+          const y = Math.floor((pixelSize - logoSize) / 2);
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(logo, x, y, logoSize, logoSize);
+        };
+      } catch {
+        // QR rendering failed.
+      }
+    };
+
+    renderQr();
+
+    return () => {
+      isActive = false;
+    };
+  }, [shareOpen, shareUrl]);
+
+  if (!BIRTHDAY_FEATURE_ENABLED) return null;
+
+  const openBirthday = () => {
+    setActiveSlide(0);
+    setIsAutoPlaying(true);
+    setShowBirthday(true);
+  };
+
+  const closeBirthday = () => {
+    setShowBirthday(false);
+    setShareOpen(false);
+  };
+
+  function goToSlide(index: number, pause = true) {
+    if (pause) setIsAutoPlaying(false);
+    setActiveSlide((index + slideCount) % slideCount);
+  }
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    touchStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (!touchStart.current) return;
+
+    const touch = event.changedTouches[0];
+    if (!touch) {
+      touchStart.current = null;
+      return;
+    }
+
+    const deltaX = touch.clientX - touchStart.current.x;
+    const deltaY = touch.clientY - touchStart.current.y;
+    touchStart.current = null;
+
+    if (Math.abs(deltaX) < 44 || Math.abs(deltaX) < Math.abs(deltaY) * 1.15) return;
+
+    goToSlide(deltaX < 0 ? activeSlide + 1 : activeSlide - 1);
+  };
+
+  const openShareMenu = () => {
+    setIsAutoPlaying(false);
+    setShareCopied(false);
+    setShareOpen(true);
+  };
+
+  const closeShareMenu = () => {
+    setShareOpen(false);
+    setShareCopied(false);
+  };
+
+  const copyShareLink = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const input = document.createElement("input");
+        input.value = shareUrl;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        input.remove();
+      }
+
+      setShareCopied(true);
+      window.setTimeout(() => setShareCopied(false), 2000);
+    } catch {
+      setShareCopied(false);
+    }
+  };
+
+  const shareToApps = async () => {
+    if (!navigator?.share) return;
+
+    try {
+      await navigator.share({ title: shareTitle, url: shareUrl });
+    } catch {
+      // Ignore share cancellation.
+    }
+  };
+
+  const downloadQr = () => {
+    const canvas = qrCanvasRef.current;
+    if (!canvas) return;
+
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = "mindful-circle-anniversary-qr.png";
+    link.click();
+  };
+
+  const downloadFlyer = async (url: string, name = "mindful-circle-anniversary.jpg") => {
+    try {
+      const res = await fetch(url, { mode: "cors" });
+      if (!res.ok) throw new Error("download-failed");
+
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = name;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = name;
+      link.click();
+    }
+  };
+
+  const downloadAll = () => {
+    BIRTHDAY_FLYERS.forEach((flyer, index) => {
+      window.setTimeout(() => {
+        downloadFlyer(flyer, `mindful-circle-anniversary-${index + 1}.jpg`);
+      }, index * 160);
+    });
+  };
+
+  const viewCarousel = () => {
+    setIsAutoPlaying(false);
+    setActiveSlide(0);
+  };
+
+  return (
+    <>
+      <button
+        className="birthday-gift-button"
+        type="button"
+        onClick={openBirthday}
+        aria-label="Open Mindful Circle birthday story"
+      >
+        <Gift size={22} aria-hidden="true" />
+        <span className="birthday-gift-spark" aria-hidden="true" />
+      </button>
+
+      {showBirthday && (
+        <div className="birthday-modal" role="dialog" aria-modal="true" aria-labelledby="birthday-title" onClick={closeBirthday}>
+          <div className="birthday-card" onClick={(event) => event.stopPropagation()}>
+            <div className="birthday-confetti-field" aria-hidden="true">
+              {BIRTHDAY_CONFETTI.map((piece, index) => (
+                <span
+                  key={`${piece.left}-${index}`}
+                  className="birthday-confetti-piece"
+                  style={{
+                    left: `${piece.left}%`,
+                    width: piece.width,
+                    height: piece.height,
+                    background: piece.color,
+                    animationDelay: `${piece.delay}ms`,
+                    animationDuration: `${piece.duration}ms`,
+                  }}
+                />
+              ))}
+            </div>
+
+            <button className="birthday-close" type="button" onClick={closeBirthday} aria-label="Close birthday story">
+              <X size={18} aria-hidden="true" />
+            </button>
+
+            <div
+              className={`birthday-card-shell${isFinalSlide ? " is-final" : ""}`}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div className="birthday-media-panel">
+                {isFinalSlide ? (
+                  <div className="birthday-finale-frame" aria-hidden="true">
+                    <div className="birthday-finale-mark">
+                      <img src={BIRTHDAY_LOGO} alt="" />
+                      <strong>@ 1</strong>
+                    </div>
+                    <div className="birthday-finale-collage">
+                      {BIRTHDAY_FLYERS.map((flyer) => (
+                        <img key={flyer} src={flyer} alt="" />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="birthday-flyer-frame">
+                    <img key={active.image} src={active.image} alt={`${active.title} flyer`} />
+                  </div>
+                )}
+
+                <div className="birthday-thumb-row" aria-label="Birthday flyer slides">
+                  {BIRTHDAY_SLIDES.map((slide, index) => (
+                    <button
+                      key={slide.image ?? slide.title}
+                      className={`birthday-thumb${index === activeSlide ? " is-active" : ""}`}
+                      type="button"
+                      onClick={() => goToSlide(index)}
+                      aria-label={`Show birthday slide ${index + 1}`}
+                      aria-current={index === activeSlide ? "true" : undefined}
+                    >
+                      {slide.image ? (
+                        <img src={slide.image} alt="" />
+                      ) : (
+                        <span className="birthday-thumb-finale">@1</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="birthday-story-panel">
+                <p className="birthday-kicker">{active.eyebrow}</p>
+                <h2 className="birthday-title" id="birthday-title">{active.title}</h2>
+                <p className="birthday-sub" aria-live="polite">{active.body}</p>
+                <p className="birthday-note">{active.note}</p>
+
+                <div className="birthday-progress" aria-hidden="true">
+                  <span>0{activeSlide + 1}</span>
+                  <div className="birthday-progress-track">
+                    <span
+                      key={activeSlide}
+                      className={`birthday-progress-fill${isAutoPlaying ? "" : " is-paused"}`}
+                      style={{ animationDuration: `${BIRTHDAY_AUTO_ADVANCE_MS}ms` }}
+                    />
+                  </div>
+                  <span>0{slideCount}</span>
+                </div>
+
+                <div className="birthday-nav-row">
+                  <button className="birthday-nav-btn" type="button" onClick={() => goToSlide(activeSlide - 1)} aria-label="Previous birthday slide">
+                    <ChevronLeft size={18} aria-hidden="true" />
+                  </button>
+                  <button className="birthday-nav-btn" type="button" onClick={() => goToSlide(activeSlide + 1)} aria-label="Next birthday slide">
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </button>
+                </div>
+
+                {isFinalSlide && (
+                  <div className="birthday-actions birthday-final-actions">
+                    <button className="birthday-primary" type="button" onClick={viewCarousel}>
+                      <Images size={16} aria-hidden="true" />
+                      View carousel
+                    </button>
+                    <button className="birthday-secondary" type="button" onClick={downloadAll}>
+                      <Download size={16} aria-hidden="true" />
+                      Download flyers
+                    </button>
+                    <button className="birthday-secondary" type="button" onClick={openShareMenu}>
+                      <Share2 size={16} aria-hidden="true" />
+                      Share site
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {shareOpen && (
+        <div className="share-modal birthday-share-modal" onClick={closeShareMenu}>
+          <div className="share-card" onClick={(event) => event.stopPropagation()}>
+            <button className="share-close" type="button" onClick={closeShareMenu} aria-label="Close share panel">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <p className="share-kicker">Share Mindful Circle</p>
+            <h3 className="share-title">{shareTitle}</h3>
+            <div className="share-actions">
+              <button className="share-btn" type="button" onClick={copyShareLink}>
+                {shareCopied ? "Link copied" : "Copy link"}
+              </button>
+              <button
+                className="share-btn secondary"
+                type="button"
+                onClick={shareToApps}
+                disabled={!navigator?.share}
+              >
+                Share to apps
+              </button>
+              <button className="share-btn secondary" type="button" onClick={downloadQr}>
+                Download QR
+              </button>
+            </div>
+            <div className="share-qr">
+              <canvas ref={qrCanvasRef} aria-label="QR code" role="img" />
+              <p>Scan to open Mindful Circle.</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+// === BIRTHDAY ANNIVERSARY FEATURE: END ===
+
+// Donate Modal
 function DonateModal({ onClose }: { onClose: () => void }) {
   const [amount, setAmount] = useState("");
   const [preset, setPreset] = useState<number | null>(50);
@@ -224,6 +709,7 @@ export default function App() {
   return (
     <div className="root">
       {modal && <DonateModal onClose={() => setModal(false)} />}
+      <BirthdayAnniversaryFeature />
 
       {/* ── Header ── */}
       <header className="header">
