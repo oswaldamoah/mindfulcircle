@@ -621,7 +621,11 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                   className={`events-modal-image${zoomed ? " zoomed" : ""}`}
                   src={modalImage}
                   alt={`${modalTitle} preview`}
-                  onDoubleClick={() => setZoomed((prev) => !prev)}
+                  onDoubleClick={() => {
+                    // Only allow zoom on desktop (not touch devices)
+                    if (!window.matchMedia("(hover: hover)").matches) return;
+                    setZoomed((prev) => !prev);
+                  }}
                 />
                 {showSwipeHint && <div className="events-modal-swipe">Swipe left or right</div>}
               </div>
