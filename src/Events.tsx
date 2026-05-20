@@ -206,7 +206,13 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
     }
   };
 
-  
+  // Scroll to top when event detail page loads
+  useEffect(() => {
+    if (selectedEvent) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [selectedEvent]);
+
   useEffect(() => {
     if (!isPlaying || activeIndex === null || !isGalleryModal) return;
     const timer = window.setInterval(() => {
