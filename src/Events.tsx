@@ -237,7 +237,8 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
     let isActive = true;
     const canvas = qrCanvasRef.current;
     // Render QR at high DPI so the embedded logo (ms.png) remains crisp.
-    const displaySize = 220; // CSS pixels for display
+    const isMobile = window.matchMedia("(max-width: 600px)").matches;
+    const displaySize = isMobile ? Math.round(220 * 0.7) : 220; // CSS pixels for display
     const ratio = Math.max(1, window.devicePixelRatio || 1);
     const pixelSize = Math.ceil(displaySize * ratio);
 

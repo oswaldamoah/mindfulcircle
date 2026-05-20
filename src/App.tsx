@@ -199,7 +199,8 @@ function BirthdayAnniversaryFeature() {
 
     let isActive = true;
     const canvas = qrCanvasRef.current;
-    const displaySize = 220;
+    const isMobile = window.matchMedia("(max-width: 600px)").matches;
+    const displaySize = isMobile ? Math.round(220 * 0.7) : 220;
     const ratio = Math.max(1, window.devicePixelRatio || 1);
     const pixelSize = Math.ceil(displaySize * ratio);
 
