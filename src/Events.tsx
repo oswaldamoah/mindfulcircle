@@ -625,7 +625,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                     {isPlaying ? "Pause slideshow" : "Play slideshow"}
                   </button>
                 )}
-                <button className="btn-donate" type="button" onClick={downloadAsPng}>Download PNG</button>
+                <button className="btn-donate" type="button" onClick={downloadAsPng}>Download</button>
               </div>
             </div>
           </div>
@@ -742,7 +742,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
               />
             </div>
             <div className="events-modal-actions">
-              <button className="btn-donate" type="button" onClick={downloadAsPng}>Download PNG</button>
+              <button className="btn-donate" type="button" onClick={downloadAsPng}>Download</button>
             </div>
           </div>
         </div>

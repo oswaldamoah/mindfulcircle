@@ -32,8 +32,8 @@ export default function MerchPage() {
         name: "Mindful Circle Cap",
         description: "Classic trucker cap with the Mindful Circle mark.",
         variants: [
-          { id: "black", label: "Black", image: "/events/cap_black.png" },
-          { id: "white", label: "White", image: "/events/cap_white.png" },
+          { id: "black", label: "Black", image: "/events/cap_black.webp" },
+          { id: "white", label: "White", image: "/events/cap_white.webp" },
         ],
       },
     ],

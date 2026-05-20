@@ -415,18 +415,18 @@ function BirthdayAnniversaryFeature() {
                 {isFinalSlide ? (
                   <div className="birthday-finale-frame" aria-hidden="true">
                     <div className="birthday-finale-mark">
-                      <img src={BIRTHDAY_LOGO} alt="" />
+                      <img src={BIRTHDAY_LOGO} alt="" loading="lazy" />
                       <strong>@ 1</strong>
                     </div>
                     <div className="birthday-finale-collage">
                       {BIRTHDAY_FLYERS.map((flyer) => (
-                        <img key={flyer} src={flyer} alt="" />
+                        <img key={flyer} src={flyer} alt="" loading="lazy" />
                       ))}
                     </div>
                   </div>
                 ) : (
                   <div className="birthday-flyer-frame">
-                    <img key={active.image} src={active.image} alt={`${active.title} flyer`} />
+                    <img key={active.image} src={active.image} alt={`${active.title} flyer`} loading="lazy" />
                   </div>
                 )}
 
@@ -441,7 +441,7 @@ function BirthdayAnniversaryFeature() {
                       aria-current={index === activeSlide ? "true" : undefined}
                     >
                       {slide.image ? (
-                        <img src={slide.image} alt="" />
+                        <img src={slide.image} alt="" loading="lazy" />
                       ) : (
                         <span className="birthday-thumb-finale">@1</span>
                       )}
@@ -602,7 +602,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
             <div className="ch-card" key={c.id}>
               <div className="ch-top">
                 <div className={`ch-logo ${c.cls}`}>
-                  <img src={c.logo} alt={c.alt} className="ch-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
+                  <img src={c.logo} alt={c.alt} className="ch-logo-img" onError={e => (e.currentTarget.style.display = "none")} loading="lazy" />
                 </div>
                 <div className="ch-info">
                   <p className="ch-name">{c.label}</p>
@@ -610,7 +610,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
                     {c.num}
                     {copied === c.nk
                       ? <span className="badge-ok">Copied</span>
-                      : <span className="badge-tap">tap to copy</span>}
+                      : <span className="badge-tap">copy</span>}
                   </button>
                   <p className="ch-holder">{c.holder}</p>
                 </div>
@@ -717,12 +717,12 @@ export default function App() {
           <div className="header-brand">
             <div className="header-logobox">
               <a href="/" onClick={handleNav("/")}>
-              <img src="/ms.png" alt="Mindful Circle" className="header-logo-img" onError={e => (e.currentTarget.style.display = "none")} /></a>
+              <img src="/ms.png" alt="Mindful Circle" className="header-logo-img" onError={e => (e.currentTarget.style.display = "none")} loading="lazy" /></a>
               <span className="header-logo-fb">MC</span>
             </div>
             <div className="header-brand-text">
               <span className="header-name">Mindful Circle</span>
-              <span className="header-sub">Youth-led Mental Health Initiative</span>
+              <span className="header-sub">Mental Health Initiative</span>
             </div>
           </div>
           <nav className="header-nav">
@@ -906,7 +906,7 @@ export default function App() {
                     <div className="qc-card" key={c.key}>
                       <div className="qc-card-top">
                         <div className={`qc-logo ${c.cls}`}>
-                          <img src={c.logo} alt={c.alt} className="qc-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
+                          <img src={c.logo} alt={c.alt} className="qc-logo-img" onError={e => (e.currentTarget.style.display = "none")} loading="lazy" />
                         </div>
                         <div>
                           <p className="qc-label">{c.label}</p>
@@ -917,7 +917,7 @@ export default function App() {
                         <span className="qc-num-text">{c.num}</span>
                         {copied === c.key
                           ? <span className="qc-tag-ok">Copied</span>
-                          : <span className="qc-tag">tap to copy</span>}
+                          : <span className="qc-tag">copy</span>}
                       </button>
                     </div>
                   ))}
@@ -927,7 +927,7 @@ export default function App() {
                 <div className="cta-panel">
                   <div className="cta-panel-glow" />
                   <div className="cta-logo-wrap">
-                    <img src="/ms.png" alt="Mindful Circle" className="cta-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
+                    <img src="/ms.png" alt="Mindful Circle" className="cta-logo-img" onError={e => (e.currentTarget.style.display = "none")} loading="lazy" />
                     <span className="cta-logo-fb">MC</span>
                   </div>
                   <h3 className="cta-panel-h3">Donate with guidance</h3>
@@ -951,7 +951,7 @@ export default function App() {
           <div className="footer-left">
             <div className="footer-brand">
               <div className="footer-logobox">
-                <img src="/ms.png" alt="Mindful Circle" className="header-logo-img" onError={e => (e.currentTarget.style.display = "none")} />
+                <img src="/ms.png" alt="Mindful Circle" className="header-logo-img" onError={e => (e.currentTarget.style.display = "none")} loading="lazy" />
                 <span className="header-logo-fb">MC</span>
               </div>
               <div>
