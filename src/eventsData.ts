@@ -31,8 +31,6 @@ export const eventsData: EventMeta[] = [
     highlight: "Wear your color with pride. Come as you are.",
     activities: [
       "Discounted price ends May 30th",
-      "Group Games & Challenges",
-      "Picnic & Music",
       "Bring items in your color or to support any color",
     ],
     partners: [],
