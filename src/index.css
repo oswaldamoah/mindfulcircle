@@ -2580,6 +2580,7 @@ strong { font-weight: 600; color: var(--p800); }
   width: 100%;
   height: 170px;
   transform: none;
+  border-radius: 12px;
 }
 .events-gallery-section {
   max-width: 1200px;
@@ -2640,37 +2641,55 @@ strong { font-weight: 600; color: var(--p800); }
 .events-modal {
   position: fixed;
   inset: 0;
-  background: rgba(20,5,38,0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(204, 162, 255, 0.199);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 0;
   z-index: 1000;
+  overflow: auto;
 }
 .events-modal-card {
   position: relative;
-  width: min(92vw, 920px);
-  max-height: 90vh;
-  background: #fff;
-  border-radius: var(--r-xl);
-  padding: 1.25rem 1.25rem 1.5rem;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  background: linear-gradient(160deg, rgba(89,47,132,0.34), rgba(42,18,72,0.38));
+  border-radius: 0;
+  padding: 0;
   box-shadow: 0 28px 80px rgba(20,5,38,0.55);
+  border: 1px solid rgba(223,196,245,0.26);
+  backdrop-filter: blur(14px) saturate(118%);
+  -webkit-backdrop-filter: blur(14px) saturate(118%);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin: 0 2.75rem;
+  gap: 0;
+  margin: 0;
+  max-width: 100%;
 }
 .events-modal-card img {
-  width: 100%;
-  height: min(60vh, 540px);
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
-  border-radius: var(--r-lg);
-  background: var(--p50);
+  border-radius: 0;
+  background: rgba(255,255,255,0.06);
 }
 .events-modal-media {
   position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: pinch-zoom pan-x pan-y;
+  padding: 1rem 0; /* give breathing room for image */
 }
 .events-modal-media.show-swipe .events-modal-image {
   animation: swipeHint 3.2s ease-in-out 1.2s 2;
@@ -2680,27 +2699,38 @@ strong { font-weight: 600; color: var(--p800); }
   animation: swipeHintText 3.2s ease-in-out 1.2s 2;
 }
 .events-modal-image {
-  width: 100%;
-  height: min(60vh, 540px);
-  object-fit: contain;
-  border-radius: var(--r-lg);
-  background: var(--p50);
   display: block;
+  width: auto;
+  height: auto;
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 40px);
+  object-fit: contain;
+  border-radius: 0;
+  background: rgba(255,255,255,0.06);
+  cursor: zoom-in;
+  transition: transform 0.3s ease;
+}
+.events-modal-image.zoomed {
+  transform: scale(1.18);
+  transition: transform 200ms ease;
+  cursor: move;
 }
 .events-modal-swipe {
-  position: absolute;
+  position: fixed;
   left: 50%;
-  bottom: 14px;
+  bottom: 80px;
   transform: translateX(-50%);
-  background: rgba(20,5,38,0.72);
+  background: rgba(20,5,38,0.85);
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.45rem 0.9rem;
+  padding: 0.6rem 1rem;
   border-radius: 100px;
   opacity: 0;
   pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .events-modal-actions {
   display: flex;
@@ -2708,42 +2738,46 @@ strong { font-weight: 600; color: var(--p800); }
   gap: 0.75rem;
   align-items: center;
   justify-content: flex-end;
+  padding: 1rem 1.25rem;
+  background: rgba(46,20,77,0.24);
+  border-top: 1px solid rgba(231,214,247,0.22);
 }
 .events-modal-link {
   border: none;
   background: transparent;
   padding: 0;
   font-size: 0.9rem;
-  color: var(--p800);
+  color: var(--p50);
   text-decoration: none;
   font-weight: 600;
   cursor: pointer;
 }
 .events-modal-link:hover { text-decoration: underline; }
 .events-modal-close {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 34px;
-  height: 34px;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
-  background: var(--p100);
+  background: rgba(255,255,255,0.95);
   color: var(--p800);
   font-size: 1.6rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3;
+  z-index: 1001;
+  box-shadow: 0 4px 12px rgba(20,5,38,0.2);
 }
-.events-modal-close:hover { background: var(--p200); }
+.events-modal-close:hover { background: #fff; box-shadow: 0 6px 16px rgba(20,5,38,0.3); }
 .events-modal-nav {
-  position: absolute;
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: rgba(255,255,255,0.9);
@@ -2754,10 +2788,11 @@ strong { font-weight: 600; color: var(--p800); }
   align-items: center;
   justify-content: center;
   box-shadow: 0 8px 24px rgba(20,5,38,0.15);
+  z-index: 999;
 }
-.events-modal-nav.prev { left: -48px; }
-.events-modal-nav.next { right: -48px; }
-.events-modal-nav:hover { background: #fff; }
+.events-modal-nav.prev { left: 1rem; }
+.events-modal-nav.next { right: 1rem; }
+.events-modal-nav:hover { background: #fff; box-shadow: 0 12px 32px rgba(20,5,38,0.25); }
 @media (max-width: 600px) {
   .events-page { padding: 0 1.25rem 2.5rem; }
   .events-hero,
@@ -2770,11 +2805,12 @@ strong { font-weight: 600; color: var(--p800); }
   .preview-2 { transform: rotate(-2deg) translate(154px, 15px); }
   .preview-3 { transform: rotate(2deg) translate(231px, -4px); }
   .events-gallery-grid { gap: 0.65rem; }
-  .events-modal-card img { height: min(55vh, 380px); }
-  .events-modal-actions { justify-content: flex-start; }
+  .events-modal-card { width: 100vw; border-radius: 0; padding: 0; }
+  .events-modal-actions { justify-content: flex-start; padding: 0.75rem 1rem; gap: 0.5rem; }
   .events-modal-card { margin: 0; }
-  .events-modal-nav { display: none; }
-  .events-modal-image { height: min(55vh, 380px); }
+  .events-modal-nav { display: flex; width: 40px; height: 40px; }
+  .events-modal-image { height: auto; }
+  .events-modal-close { top: 0.75rem; right: 0.75rem; width: 36px; height: 36px; }
 }
 
 @keyframes swipeHint {

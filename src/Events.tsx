@@ -41,6 +41,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   const [isPlaying, setIsPlaying] = useState(false);
   const [standaloneImage, setStandaloneImage] = useState<string | null>(null);
   const [standaloneTitle, setStandaloneTitle] = useState<string | null>(null);
+  const [zoomed, setZoomed] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
   const [shareTitle, setShareTitle] = useState<string>("");
@@ -91,6 +92,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
     setIsPlaying(false);
     setStandaloneImage(null);
     setStandaloneTitle(null);
+    setZoomed(false);
   };
 
   const showSwipeHint = isGalleryModal && activeIndex === 0;
@@ -609,13 +611,15 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                 </>
               )}
               <div className={showSwipeHint ? "events-modal-media show-swipe" : "events-modal-media"}>
-                <img className="events-modal-image" src={modalImage} alt={`${modalTitle} preview`} />
+                <img
+                  className={`events-modal-image${zoomed ? " zoomed" : ""}`}
+                  src={modalImage}
+                  alt={`${modalTitle} preview`}
+                  onDoubleClick={() => setZoomed((prev) => !prev)}
+                />
                 {showSwipeHint && <div className="events-modal-swipe">Swipe left or right</div>}
               </div>
               <div className="events-modal-actions">
-                <a className="events-modal-link" href={modalImage} target="_blank" rel="noopener noreferrer">
-                  Open full size
-                </a>
                 {isGalleryModal && galleryImages.length > 1 && (
                   <button className="events-modal-link" onClick={() => setIsPlaying((prev) => !prev)} type="button">
                     {isPlaying ? "Pause slideshow" : "Play slideshow"}
@@ -730,12 +734,14 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
               <span aria-hidden="true">&times;</span>
             </button>
             <div className="events-modal-media">
-              <img className="events-modal-image" src={modalImage} alt={`${modalTitle} flyer`} />
+              <img
+                className={`events-modal-image${zoomed ? " zoomed" : ""}`}
+                src={modalImage}
+                alt={`${modalTitle} flyer`}
+                onDoubleClick={() => setZoomed((prev) => !prev)}
+              />
             </div>
             <div className="events-modal-actions">
-              <a className="events-modal-link" href={modalImage} target="_blank" rel="noopener noreferrer">
-                Open full size
-              </a>
               <button className="btn-donate" type="button" onClick={downloadAsPng}>Download PNG</button>
             </div>
           </div>
