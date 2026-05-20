@@ -47,6 +47,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   const [shareTitle, setShareTitle] = useState<string>("");
   const [shareCopied, setShareCopied] = useState(false);
   const [widgetStatus, setWidgetStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+  const [shortcodeAlert, setShortcodeAlert] = useState<string | null>(null);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const widgetAttempts = useRef(0);
   const widgetTimeout = useRef<number | null>(null);
@@ -77,6 +78,28 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
       if (prev === null) return 0;
       return (prev + 1) % galleryImages.length;
     });
+  };
+
+  const copyTextToClipboard = async (text: string) => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {
+      // fallback below
+    }
+    try {
+      const input = document.createElement("input");
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      input.remove();
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const goPrev = () => {
@@ -297,13 +320,8 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
       if (!target || !target.closest) return;
       const el = target.closest('.btn-donate, .mc-tickets-btn, .cta-donate-btn, .share-btn, .event-share-btn');
       if (!el) return;
-      try {
-        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-          (navigator as any).vibrate(10);
-        }
-      } catch {
-        // ignore vibration errors
-      }
+      // Intentionally do not call navigator.vibrate to avoid blocked vibration warnings
+      // Browser vibration can be blocked in cross-frame contexts; keep interaction visual only.
     };
 
     document.addEventListener('pointerdown', handler);
@@ -420,6 +438,9 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   if (selectedSlug && !selectedEvent) {
     return (
       <main className="events-page">
+        {shortcodeAlert && (
+          <div className="shortcode-alert" role="status">{shortcodeAlert}</div>
+        )}
         <section className="events-hero">
           <div className="events-hero-inner">
             <p className="events-kicker">Events</p>
@@ -526,7 +547,22 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
               <div className="events-detail-actions">
                 <div className="events-detail-actions-row">
                   {selectedEvent.slug === "color-picnic" && (
-                    <a className="btn-donate events-register-btn" href="#tickets">Register now</a>
+                    <a
+                      className="btn-donate events-register-btn"
+                      href="#tickets"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        const ticketsEl = document.getElementById("tickets");
+                        if (ticketsEl) ticketsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                        const shortcode = selectedEvent?.shortcode;
+                        if (!shortcode) return;
+                        await copyTextToClipboard(shortcode);
+                        setShortcodeAlert(`registration shortcode copied to clipboard: {${shortcode}}`);
+                        window.setTimeout(() => setShortcodeAlert(null), 3500);
+                      }}
+                    >
+                      Register now
+                    </a>
                   )}
                   {selectedEvent.galleryImages.length > 0 && (
                     <a className="btn-donate" href="#gallery">View gallery</a>

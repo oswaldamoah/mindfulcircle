@@ -218,6 +218,24 @@ strong { font-weight: 600; color: var(--p800); }
 }
 .modal-desc { color: rgba(20,5,38,0.66); margin-bottom: 1rem; }
 
+/* Shortcode copy alert (neat green) */
+.shortcode-alert {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 12px;
+  background: #e6f9ed;
+  color: #0a5b2f;
+  border: 1px solid rgba(10,91,47,0.12);
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 8px 30px rgba(10,91,47,0.08);
+  z-index: 99999;
+  font-family: var(--ff-sans);
+  pointer-events: none;
+}
+
 .mfield { margin-bottom: 0.9rem; }
 .mlabel { display: block; font-weight: 600; color: var(--p700); margin-bottom: 0.45rem; }
 .mlabel-unit { font-weight: 600; color: var(--p600); margin-left: 8px; font-size: 0.85rem; }

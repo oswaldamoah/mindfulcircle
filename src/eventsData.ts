@@ -16,6 +16,7 @@ export type EventMeta = {
   activities: string[];
   partners: { name: string; logo: string; url?: string }[];
   flyerImage?: string;
+  shortcode?: string;
 };
 
 export const eventsData: EventMeta[] = [
@@ -35,6 +36,7 @@ export const eventsData: EventMeta[] = [
     ],
     partners: [],
     flyerImage: "/events/color-picnic-flyer.jpg",
+    shortcode: "*713*33*992#",
   },
   {
     slug: "open-mic-night",
