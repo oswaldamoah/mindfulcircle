@@ -15,7 +15,8 @@ const parseGalleryImages = (html: string) => {
   const doc = new DOMParser().parseFromString(html, "text/html");
   const srcs = Array.from(doc.images)
     .map((img) => img.getAttribute("src") || "")
-    .filter((src): src is string => Boolean(src));
+    .filter((src): src is string => Boolean(src))
+    .filter((src) => !src.startsWith("data:image/svg+xml"));
   if (srcs.length > 0) return Array.from(new Set(srcs));
 
   // Fallback for very large HTML strings where DOM parsing can drop nodes.
