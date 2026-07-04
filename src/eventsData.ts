@@ -26,17 +26,33 @@ export const eventsData: EventMeta[] = [
     summary:
       "A wellness experience of music, games, and good vibes.",
     location: "Aburi Botanical Gardens",
-    time: "Shuttle leaves at 9AM. Event from 10AM-4PM",
-    status: "Upcoming",
+    time: "All-day",
+    status: "Past",
     date: { month: "Jun", day: "06", year: "2026" },
     highlight: "Wear your color with pride. Come as you are.",
-    activities: [
-      "Discounted price ends May 30th",
-      "Bring items in your color or to support any color",
-    ],
-    partners: [],
-    flyerImage: "/events/color-picnic-flyer.jpg",
-    shortcode: "*713*33*992#",
+    activities: [],
+    partners: [
+  {
+    name: "Talk To Heal Foundation",
+    logo: "https://res.cloudinary.com/sjlbtzir/image/upload/v1783200145/talktoheal_sy0mna.jpg",
+    url: "https://www.instagram.com/_talktoheal/",
+  },
+  {
+    name: "McLoi Impact Foundation",
+    logo: "https://res.cloudinary.com/sjlbtzir/image/upload/v1783200145/mcloi_dfm3mb.jpg",
+    url: "https://www.instagram.com/themcloiimpact_foundation/",
+  },
+  {
+    name: "DKB Travel & Tours",
+    logo: "https://res.cloudinary.com/sjlbtzir/image/upload/v1783200145/dkb_criapt.jpg",
+    url: "https://www.instagram.com/dkbtravelandtours/",
+  },
+  {
+    name: "VoyaEx Tours",
+    logo: "https://res.cloudinary.com/sjlbtzir/image/upload/v1783200145/voyagex_nz2di8.jpg",
+    url: "https://www.instagram.com/voyagextours/",
+  },
+],
   },
   {
     slug: "open-mic-night",

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent, TouchEvent } from "react";
 import openMicHtml from "../open-mic-night.html?raw";
+import picnicHtml from "../public/events/ABURI PICNIC by Gyasiblaq (7_4_2026 7：13：31 PM).html?raw";
 import { eventsData, type EventMeta } from "./eventsData";
 import QRCode from "qrcode";
 import { Share2 } from "lucide-react";
@@ -53,13 +54,19 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   const widgetTimeout = useRef<number | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const openMicImages = useMemo(() => parseGalleryImages(openMicHtml), []);
+  const picnicImages = useMemo(() => parseGalleryImages(picnicHtml), []);
   const events = useMemo<EventItem[]>(
     () =>
       eventsData.map((event) => ({
         ...event,
-        galleryImages: event.slug === "open-mic-night" ? openMicImages : [],
+        galleryImages:
+          event.slug === "open-mic-night"
+            ? openMicImages
+            : event.slug === "color-picnic"
+              ? picnicImages
+              : [],
       })),
-    [openMicImages]
+    [openMicImages, picnicImages]
   );
   
   const selectedEvent = selectedSlug
@@ -71,6 +78,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
   const isGalleryModal = activeImage !== null;
   const modalTitle = selectedEvent?.title ?? standaloneTitle ?? "Event";
   const handleNav = usePopstateNav();
+  const showPicnicTickets = selectedEvent?.slug === "color-picnic" && selectedEvent.status === "Upcoming";
 
   const goNext = () => {
     if (!galleryImages.length) return;
@@ -345,7 +353,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
         .forEach((frame) => frame.remove());
     };
 
-    if (selectedEvent?.slug !== "color-picnic") {
+    if (!showPicnicTickets) {
       setWidgetStatus("idle");
       removeScript();
       clearWidgetContainer();
@@ -414,7 +422,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
       cleanupTimeout();
       removeScript();
     };
-  }, [selectedEvent?.slug]);
+  }, [showPicnicTickets]);
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     const touch = event.touches[0];
@@ -491,7 +499,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
                 <p className="events-detail-value">{selectedEvent.time}</p>
               </div>
               
-              {selectedEvent.slug === "color-picnic" && (
+              {showPicnicTickets && (
                 <div>
                   <p className="events-detail-label">Merch</p>
                   <a className="events-detail-value events-detail-link-inline" href="/merch#cap">Caps available now!</a>
@@ -542,11 +550,11 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
               </div>
             )}
             {(selectedEvent.galleryImages.length > 0
-              || selectedEvent.slug === "color-picnic"
+              || showPicnicTickets
               || Boolean(selectedEvent.flyerImage)) && (
               <div className="events-detail-actions">
                 <div className="events-detail-actions-row">
-                  {selectedEvent.slug === "color-picnic" && (
+                  {showPicnicTickets && (
                     <a
                       className="btn-donate events-register-btn"
                       href="#tickets"
@@ -594,7 +602,7 @@ export default function EventsPage({ selectedSlug }: { selectedSlug?: string | n
           </div>
         </section>
 
-        {selectedEvent.slug === "color-picnic" && (
+        {showPicnicTickets && (
           <section id="tickets" className="mc-tickets-section">
             <div
               id="egotickets-widget-container"
