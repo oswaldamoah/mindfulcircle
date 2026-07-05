@@ -564,8 +564,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
   const wa = (msg: string) => `https://wa.me/233599078844?text=${encodeURIComponent(msg)}`;
 
   const channels = [
-    { id: "telecel", label: "Telecel Cash",                holder: "Eugene Kwesi Arkhurst", num: "0206238800",    nk: "tn", mk: "tm", cls: "logo-telecel",  logo: assetUrl("/tcash.png"), alt: "Telecel", wa: true  },
-    { id: "bank",    label: "Stanbic Bank, West Hills Mall", holder: "Gerald Kwesi Amoako", num: "9040014155508", nk: "bn", mk: "bm", cls: "logo-bank",     logo: assetUrl("/stanbic.png"), alt: "Stanbic", wa: false },
+    { id: "bank",    label: "ABSA Bank", holder: "Eugene Kwesi Arkhurst", num: "0541259503", nk: "bn", mk: "bm", cls: "logo-bank",     logo: assetUrl("/absa.webp"), alt: "ABSA", wa: false },
   ] as const;
 
   return (
@@ -901,8 +900,7 @@ export default function App() {
                 {/* Quick-copy channel cards */}
                 <div className="qc-col">
                   {[
-                    { label: "Telecel Cash",                    owner: "Eugene Kwesi Arkhurst", num: "0206238800",    key: "tcl",  cls: "logo-telecel",  logo: assetUrl("/tcash.png"), alt: "Telecel Cash" },
-                    { label: "Stanbic Bank, West Hills Mall",  owner: "Gerald Kwesi Amoako",   num: "9040014155508", key: "bank", cls: "logo-bank",     logo: assetUrl("/stanbic.png"), alt: "Stanbic Bank"  },
+                    { label: "ABSA Bank",  owner: "Eugene Kwesi Arkhurst",   num: "0541259503", key: "bank", cls: "logo-bank",     logo: assetUrl("/absa.webp"), alt: "ABSA Bank"  },
                   ].map(c => (
                     <div className="qc-card" key={c.key}>
                       <div className="qc-card-top">

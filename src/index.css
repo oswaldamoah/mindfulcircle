@@ -2978,7 +2978,7 @@ strong { font-weight: 600; color: var(--p800); }
 .logo-mtn     { background: linear-gradient(135deg, #ffcc00, #feca05); }
 .logo-telecel { background: linear-gradient(135deg, #e52325
 , #ed060a); }
-.logo-bank    { background: linear-gradient(135deg, #0251fc, #0251fc); }
+.logo-bank    { background: linear-gradient(135deg, #d90138,#d90138); }
 
 .qc-label {
   font-size: 0.9375rem;
